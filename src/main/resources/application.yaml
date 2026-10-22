@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: doceenc-core-api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/database
+    username: username
+    password: password
+
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        format_sql: true
