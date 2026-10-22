@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: doceenc-postgres
+    environment:
+      POSTGRES_DB: doceenc-core-db
+      POSTGRES_USER: doceenc
+      POSTGRES_PASSWORD: doceenc
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+volumes:
+  postgres_data:
