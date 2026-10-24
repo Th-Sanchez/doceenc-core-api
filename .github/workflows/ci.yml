@@ -15,7 +15,7 @@ jobs:
         image: postgres:17-alpine
         env:
           POSTGRES_DB: doceenc-core-db
-          POSTGRES_USER: ${{ secrest.DATASOURCE_USERNAME }}
+          POSTGRES_USER: ${{ secrets.DATASOURCE_USERNAME }}
           POSTGRES_PASSWORD: ${{ secrets.DATASOURCE_PASSWORD }}
         ports:
           - 5432:5432
