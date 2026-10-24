@@ -4,14 +4,14 @@ services:
     container_name: doceenc-postgres
     environment:
       POSTGRES_DB: doceenc-core-db
-      POSTGRES_USER: ${DB_USER:doceenc}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:doceenc}
+      POSTGRES_USER: ${DB_USER:-doceenc}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-doceenc}
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U doceenc -d doceenc"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 10

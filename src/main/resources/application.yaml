@@ -3,9 +3,9 @@ spring:
     name: doceenc-core-api
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/database
-    username: username
-    password: password
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/database}
+    username: ${DATASOURCE_USERNAME:username}
+    password: ${DATASOURCE_PASSWORD:password}
 
   jpa:
     show-sql: true
