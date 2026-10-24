@@ -4,8 +4,8 @@ services:
     container_name: doceenc-postgres
     environment:
       POSTGRES_DB: doceenc-core-db
-      POSTGRES_USER: ${DB_USER:-doceenc}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-doceenc}
+      POSTGRES_USER: ${DATASOURCE_USERNAME:-doceenc}
+      POSTGRES_PASSWORD: ${DATASOURCE_PASSWORD:-doceenc}
     ports:
       - "5432:5432"
     volumes:
