@@ -1,15 +1,20 @@
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:17-alpine
     container_name: doceenc-postgres
     environment:
       POSTGRES_DB: doceenc-core-db
-      POSTGRES_USER: doceenc
-      POSTGRES_PASSWORD: doceenc
+      POSTGRES_USER: ${DB_USER:doceenc}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:doceenc}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U doceenc -d doceenc"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
 volumes:
   postgres_data:
