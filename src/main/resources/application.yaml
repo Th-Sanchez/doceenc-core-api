@@ -8,11 +8,43 @@ spring:
     password: ${DATASOURCE_PASSWORD:password}
 
   jpa:
-    show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-    properties:
-      hibernate:
-        format_sql: true
     hibernate:
       ddl-auto: validate
     open-in-view: false
+
+  flyway:
+    enabled: true
+
+  session:
+    timeout: 12h
+    jdbc:
+      initialize-schema: never
+
+  web:
+    error:
+      include-message: never
+      include-stacktrace: never
+
+server:
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: strict
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+app:
+  cors:
+    allowed-origin: ${CORS_ALLOWED_ORIGIN:}
+  initial-user:
+    email: ${INITIAL_USER_PASSWORD:}
+    password: ${INITIAL_USER_PASSWORD:}
