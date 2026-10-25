@@ -26,13 +26,6 @@ spring:
       include-message: never
       include-stacktrace: never
 
-server:
-  servlet:
-    session:
-      cookie:
-        http-only: true
-        same-site: strict
-
 management:
   endpoints:
     web:
