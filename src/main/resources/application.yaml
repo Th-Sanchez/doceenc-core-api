@@ -39,5 +39,5 @@ app:
   cors:
     allowed-origin: ${CORS_ALLOWED_ORIGIN:}
   initial-user:
-    email: ${INITIAL_USER_PASSWORD:}
+    email: ${INITIAL_USER_EMAIL:}
     password: ${INITIAL_USER_PASSWORD:}
