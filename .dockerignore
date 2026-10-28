@@ -1,0 +1,16 @@
+target/
+
+env.prod.yaml
+.env
+.env.*
+
+.git/
+.gitignore
+.github/
+.idea/
+.vscode/
+*.iml
+
+docs/
+infrastructure/
+README.md
