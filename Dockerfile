@@ -12,7 +12,8 @@ RUN chmod +x mvnw && ./mvnw -B -q dependency:go-offline
 COPY src/ src/
 # Tests run in CI (they need Docker for Testcontainers), not while building the image.
 RUN ./mvnw -B -q -DskipTests package \
- && java -Djarmode=tools -jar target/*.jar extract --destination extracted
+ && java -Djarmode=tools -jar target/*.jar extract --destination extracted \
+ && mv extracted/*.jar extracted/app.jar
 
 # ---- runtime stage ----
 FROM eclipse-temurin:25-jre
