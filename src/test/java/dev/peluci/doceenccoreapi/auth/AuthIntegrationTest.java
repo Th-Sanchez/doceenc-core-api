@@ -39,7 +39,8 @@ public class AuthIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        jdbc.update("delete from spring_session");
+        jdbc.update("DELETE FROM spring_session");
+        jdbc.update("DELETE FROM login_throttle");
         users.deleteAll();
         users.save(new User(EMAIL, passwordEncoder.encode(PASSWORD)));
     }
@@ -137,7 +138,7 @@ public class AuthIntegrationTest {
     }
 
     private int sessionCount() {
-        Integer count = jdbc.queryForObject("select count(*) from spring_session", Integer.class);
+        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM spring_session", Integer.class);
         return count == null ? 0 : count;
     }
 

@@ -28,7 +28,7 @@ public class ApplicationSmokeTest {
     @Test
     void flywayAppliesMigrations() {
         Integer applied = jdbc.queryForObject(
-                "select count(*) from flyway_schema_history where success", Integer.class);
+                "SELECT COUNT(*) FROM flyway_schema_history WHERE success", Integer.class);
         assertThat(applied).isGreaterThanOrEqualTo(1);
     }
 

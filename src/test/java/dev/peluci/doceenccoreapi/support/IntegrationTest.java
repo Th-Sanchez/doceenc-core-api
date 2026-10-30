@@ -18,6 +18,6 @@ import java.lang.annotation.Target;
 @Documented
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(TestContainersConfiguration.class)
+@Import({TestContainersConfiguration.class, TestClockConfiguration.class})
 public @interface IntegrationTest {
 }

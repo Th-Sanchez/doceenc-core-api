@@ -2,20 +2,14 @@ package dev.peluci.doceenccoreapi.auth;
 
 import dev.peluci.doceenccoreapi.auth.dto.LoginRequest;
 import dev.peluci.doceenccoreapi.auth.dto.MeResponse;
-import dev.peluci.doceenccoreapi.shared.error.ApiException;
-import dev.peluci.doceenccoreapi.shared.error.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
@@ -30,12 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
+    private final LoginService loginService;
     private final SecurityContextRepository securityContextRepository;
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
 
-    public AuthController(AuthenticationManager authenticationManager, SecurityContextRepository securityContextRepository) {
-        this.authenticationManager = authenticationManager;
+    public AuthController(LoginService loginService, SecurityContextRepository securityContextRepository) {
+        this.loginService = loginService;
         this.securityContextRepository = securityContextRepository;
     }
 
@@ -44,14 +38,7 @@ public class AuthController {
     @SecurityRequirements
     ResponseEntity<Void> login(@Valid @RequestBody LoginRequest body,
                                HttpServletRequest request, HttpServletResponse response) {
-        Authentication authentication;
-        try {
-            authentication = authenticationManager.authenticate(
-                    UsernamePasswordAuthenticationToken.unauthenticated(body.email(), body.password()));
-        } catch (AuthenticationException ex) {
-            throw new ApiException(HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_CREDENTIALS,
-                    "Invalid email or password");
-        }
+        Authentication authentication = loginService.authenticate(body.email(), body.password());
 
         if (request.getSession(false) != null) {
             request.changeSessionId();
