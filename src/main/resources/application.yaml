@@ -3,9 +3,9 @@ spring:
     name: doceenc-core-api
 
   datasource:
-    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/database}
-    username: ${DATASOURCE_USERNAME:username}
-    password: ${DATASOURCE_PASSWORD:password}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/database}
+    username: ${DB_USER:username}
+    password: ${DB_PASSWORD:password}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
