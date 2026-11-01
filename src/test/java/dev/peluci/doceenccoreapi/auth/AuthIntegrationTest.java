@@ -85,7 +85,8 @@ public class AuthIntegrationTest {
 
     @Test
     void invalidLoginPayloadIsABadRequest() throws Exception {
-        login("", "").andExpect(status().isBadRequest());
+        login("", "").andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"));
     }
 
     @Test
