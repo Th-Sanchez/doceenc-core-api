@@ -15,10 +15,10 @@ public class ScaleTest {
     }
 
     @Test
-    void unitPriceKeepsFourDigits() {
-        BigDecimal value = Scale.unitPrice(new BigDecimal("0.02345"));
+    void unitPriceKeepsSixDigits() {
+        BigDecimal value = Scale.unitPrice(new BigDecimal("0.0234567"));
 
-        assertThat(value).isEqualByComparingTo("0.0235");
+        assertThat(value).isEqualByComparingTo("0.023457");
         assertThat(value.scale()).isEqualTo(Scale.UNIT_PRICE);
     }
 

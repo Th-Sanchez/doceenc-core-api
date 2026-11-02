@@ -21,7 +21,7 @@ public final class Scale {
     public static final int MONEY = 2;
 
     /** Price per base unit (per gram, per ml, per unit): small values need more digits. */
-    public static final int UNIT_PRICE = 4;
+    public static final int UNIT_PRICE = 6;
 
     /** Quantities of ingredients in recipes. */
     public static final int QUANTITY = 4;
