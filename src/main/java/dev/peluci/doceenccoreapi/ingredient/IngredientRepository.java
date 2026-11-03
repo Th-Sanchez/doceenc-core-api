@@ -1,14 +1,18 @@
 package dev.peluci.doceenccoreapi.ingredient;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface IngredientRepository extends JpaRepository<Ingredient, UUID> {
+public interface IngredientRepository extends JpaRepository<Ingredient, UUID>, JpaSpecificationExecutor<Ingredient> {
 
     @Query("""
             SELECT i FROM Ingredient i 
@@ -18,5 +22,9 @@ public interface IngredientRepository extends JpaRepository<Ingredient, UUID> {
 
     @EntityGraph(attributePaths = "category")
     Optional<Ingredient> findWithCategoryById(UUID id);
+
+    @Override
+    @EntityGraph(attributePaths = "category")
+    List<Ingredient> findAll(Specification<Ingredient> spec, Sort sort);
 
 }

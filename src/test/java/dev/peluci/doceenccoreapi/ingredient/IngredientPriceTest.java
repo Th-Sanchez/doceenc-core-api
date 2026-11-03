@@ -69,4 +69,11 @@ public class IngredientPriceTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
+    @Test
+    void rejectsAPriceThatRoundsToZeroPerUnit() {
+        assertThatThrownBy(() -> IngredientPrice.of(new BigDecimal("0.01"), new BigDecimal("999999"), InputUnit.KG, BaseUnit.GRAM))
+                .isInstanceOfSatisfying(ApiException.class,
+                        e -> assertThat(e.getCode()).isEqualTo(ErrorCode.PRICE_OUT_OF_RANGE));
+    }
+
 }

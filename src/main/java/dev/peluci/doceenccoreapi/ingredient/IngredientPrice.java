@@ -54,7 +54,13 @@ public class IngredientPrice {
         if (baseQuantity.signum() <= 0) {
             throw new IllegalArgumentException("quantity is too small");
         }
+
         BigDecimal unitPrice = Scale.unitPrice(Scale.divide(price, baseQuantity));
+        if (unitPrice.signum() <= 0) {
+            throw new ApiException(HttpStatus.UNPROCESSABLE_CONTENT, ErrorCode.PRICE_OUT_OF_RANGE,
+                    "Price is too small for this quantity.");
+        }
+
         return new IngredientPrice(price, baseQuantity, unitPrice);
     }
 
