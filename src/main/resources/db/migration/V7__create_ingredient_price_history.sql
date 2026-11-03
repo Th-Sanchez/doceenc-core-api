@@ -9,4 +9,4 @@ CREATE TABLE ingredient_price_history (
 );
 
 CREATE INDEX ix_price_history_ingredient_purchased
-    ON ingredient_price_history (ingredient_id, purchased_on DESC, created_at DESC);
+    ON ingredient_price_history (ingredient_id, purchased_on DESC, id DESC);
