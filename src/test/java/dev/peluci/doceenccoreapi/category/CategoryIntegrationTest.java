@@ -1,6 +1,7 @@
 package dev.peluci.doceenccoreapi.category;
 
 import dev.peluci.doceenccoreapi.auth.UserRepository;
+import dev.peluci.doceenccoreapi.support.DatabaseCleaner;
 import dev.peluci.doceenccoreapi.support.IntegrationTest;
 import dev.peluci.doceenccoreapi.support.TestAuthenticator;
 import jakarta.servlet.http.Cookie;
@@ -43,16 +44,14 @@ public class CategoryIntegrationTest {
     @Autowired
     JdbcTemplate jdbc;
 
+    @Autowired
+    DatabaseCleaner cleaner;
+
     private Cookie session;
 
     @BeforeEach
     void setUp() throws Exception {
-        jdbc.update("DELETE FROM ingredient_price_history");
-        jdbc.update("DELETE FROM ingredient");
-        jdbc.update("DELETE FROM category");
-        jdbc.update("DELETE FROM spring_session");
-        jdbc.update("DELETE FROM login_throttle");
-        users.deleteAll();
+        cleaner.clean();
         session = new TestAuthenticator(mockMvc, users, passwordEncoder).loginAsNewUser();
     }
 

@@ -3,11 +3,11 @@ package dev.peluci.doceenccoreapi.ingredient;
 import dev.peluci.doceenccoreapi.category.Category;
 import dev.peluci.doceenccoreapi.category.CategoryRepository;
 import dev.peluci.doceenccoreapi.category.CategoryType;
+import dev.peluci.doceenccoreapi.support.DatabaseCleaner;
 import dev.peluci.doceenccoreapi.support.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,15 +28,13 @@ public class IngredientPriceHistoryRepositoryTest {
     IngredientPriceHistoryRepository history;
 
     @Autowired
-    JdbcTemplate jdbc;
+    DatabaseCleaner cleaner;
 
     private Category category;
 
     @BeforeEach
     void setUp() {
-        jdbc.update("DELETE FROM ingredient_price_history");
-        jdbc.update("DELETE FROM ingredient");
-        jdbc.update("DELETE FROM category");
+        cleaner.clean();
         category = categories.save(new Category("Farinhas", CategoryType.INGREDIENT));
     }
 

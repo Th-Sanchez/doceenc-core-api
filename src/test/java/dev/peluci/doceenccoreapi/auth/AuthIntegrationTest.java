@@ -1,5 +1,6 @@
 package dev.peluci.doceenccoreapi.auth;
 
+import dev.peluci.doceenccoreapi.support.DatabaseCleaner;
 import dev.peluci.doceenccoreapi.support.IntegrationTest;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,11 +38,12 @@ public class AuthIntegrationTest {
     @Autowired
     JdbcTemplate jdbc;
 
+    @Autowired
+    DatabaseCleaner cleaner;
+
     @BeforeEach
     void setUp() {
-        jdbc.update("DELETE FROM spring_session");
-        jdbc.update("DELETE FROM login_throttle");
-        users.deleteAll();
+        cleaner.clean();
         users.save(new User(EMAIL, passwordEncoder.encode(PASSWORD)));
     }
 
