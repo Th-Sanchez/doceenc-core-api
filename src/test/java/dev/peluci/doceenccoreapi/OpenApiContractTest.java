@@ -18,6 +18,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @IntegrationTest
@@ -62,6 +63,33 @@ public class OpenApiContractTest {
                 .as("response properties missing @Schema(requiredMode = REQUIRED)")
                 .isEmpty();
 
+    }
+
+    @Test
+    void problemDetailDocumentsTheFieldsTheApiReallySends() throws Exception {
+        cleaner.clean();
+        Cookie session = new TestAuthenticator(mockMvc, users, passwordEncoder).loginAsNewUser();
+
+        String json = mockMvc.perform(get("/v3/api-docs").cookie(session))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        Map<String, Object> properties = JsonPath.read(json, "$.components.schemas.ProblemDetail.properties");
+        List<String> required = JsonPath.read(json, "$.components.schemas.ProblemDetail.required");
+
+        assertThat(properties).containsKeys("code", "errors", "retryAfterSeconds");
+        assertThat(required).contains("code");
+        assertThat(json).contains("\"FieldProblem\"");
+    }
+
+    @Test
+    void errorsRaisedBySpringMvcAlsoCarryACode() throws Exception {
+        cleaner.clean();
+        Cookie session = new TestAuthenticator(mockMvc, users, passwordEncoder).loginAsNewUser();
+
+        mockMvc.perform(get("/api/v1/does-not-exist").cookie(session))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("HTTP_ERROR"));
     }
 
 }
