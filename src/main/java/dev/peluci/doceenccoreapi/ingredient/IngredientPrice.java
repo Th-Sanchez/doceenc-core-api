@@ -40,7 +40,7 @@ public class IngredientPrice {
 
         if (inputUnit.baseUnit() != ingredientUnit) {
             throw new ApiException(HttpStatus.UNPROCESSABLE_CONTENT, ErrorCode.INCOMPATIBLE_UNIT,
-                    "Unit" + inputUnit + " is not compatible with an ingredient measured in " + ingredientUnit + ".");
+                    "Unit " + inputUnit + " is not compatible with an ingredient measured in " + ingredientUnit + ".");
         }
         if (packagePrice.signum() <= 0) {
             throw new IllegalArgumentException("packagePrice must be positive");
