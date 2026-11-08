@@ -44,7 +44,7 @@ public class RecipeItem {
         changeQuantity(quantity);
     }
 
-    void changeQuantity(BigDecimal newQuantity) {
+    boolean changeQuantity(BigDecimal newQuantity) {
         Objects.requireNonNull(newQuantity, "quantity");
 
         if (newQuantity.signum() <= 0) {
@@ -57,7 +57,9 @@ public class RecipeItem {
             throw new IllegalArgumentException("quantity is too small");
         }
 
+        boolean changed = this.quantity == null || this.quantity.compareTo(normalized) != 0;
         this.quantity = normalized;
+        return changed;
     }
 
     public BigDecimal cost() {

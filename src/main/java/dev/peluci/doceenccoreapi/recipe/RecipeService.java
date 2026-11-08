@@ -17,6 +17,7 @@ import dev.peluci.doceenccoreapi.recipe.dto.UpdateRecipeRequest;
 import dev.peluci.doceenccoreapi.shared.error.ApiException;
 import dev.peluci.doceenccoreapi.shared.error.ErrorCode;
 import dev.peluci.doceenccoreapi.shared.numeric.Scale;
+import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,11 +37,13 @@ public class RecipeService {
     private final RecipeRepository recipes;
     private final IngredientRepository ingredients;
     private final CategoryRepository categories;
+    private final AuditingHandler auditingHandler;
 
-    public RecipeService(RecipeRepository recipes, IngredientRepository ingredients, CategoryRepository categories) {
+    public RecipeService(RecipeRepository recipes, IngredientRepository ingredients, CategoryRepository categories, AuditingHandler auditingHandler) {
         this.recipes = recipes;
         this.ingredients = ingredients;
         this.categories = categories;
+        this.auditingHandler = auditingHandler;
     }
 
     @Transactional(readOnly = true)
@@ -82,7 +85,9 @@ public class RecipeService {
         List<ItemDraft> drafts = resolveDrafts(request.items(), currentIngredientIds);
 
         recipe.update(name, category, request.yieldQuantity(), request.prepTimeMinutes(), request.shelfLifeDays());
-        recipe.replaceItems(drafts);
+        if (recipe.replaceItems(drafts)) {
+            auditingHandler.markModified(recipe);
+        }
         return RecipeDetailResponse.from(recipes.saveAndFlush(recipe));
     }
 

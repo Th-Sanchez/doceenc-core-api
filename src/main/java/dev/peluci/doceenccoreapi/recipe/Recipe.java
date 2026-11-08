@@ -99,7 +99,7 @@ public class Recipe extends AuditableEntity {
         this.shelfLifeDays = shelfLifeDays;
     }
 
-    public void replaceItems(Collection<ItemDraft> drafts) {
+    public boolean replaceItems(Collection<ItemDraft> drafts) {
         Objects.requireNonNull(drafts, "drafts");
         if (drafts.isEmpty()) {
             throw new IllegalArgumentException("a recipe needs at least one item");
@@ -112,12 +112,12 @@ public class Recipe extends AuditableEntity {
             }
         }
 
-        items.removeIf(item -> !wanted.containsKey(item.getIngredient().getId()));
+        boolean changed = items.removeIf(item -> !wanted.containsKey(item.getIngredient().getId()));
 
         Set<UUID> existing = new HashSet<>();
         for (RecipeItem item : items) {
             UUID ingredientId = item.getIngredient().getId();
-            item.changeQuantity(wanted.get(ingredientId).quantity());
+            changed |= item.changeQuantity(wanted.get(ingredientId).quantity());
             existing.add(ingredientId);
         }
 
@@ -126,6 +126,8 @@ public class Recipe extends AuditableEntity {
                 items.add(new RecipeItem(this, draft.ingredient(), draft.quantity()));
             }
         });
+
+        return changed;
     }
 
     public RecipeCostCalculator.Summary cost() {
