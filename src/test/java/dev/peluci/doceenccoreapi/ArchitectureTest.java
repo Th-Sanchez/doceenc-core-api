@@ -43,7 +43,7 @@ public class ArchitectureTest {
     }
 
     @Test
-    void sharedDesNotDependOnAnyFeature() {
+    void sharedDoesNotDependOnAnyFeature() {
         ArchRule rule = noClasses().that().resideInAPackage(pkg("shared"))
                 .should().dependOnClassesThat().resideInAnyPackage(
                         pkg("auth"), pkg("category"), pkg("ingredient"),
@@ -60,7 +60,7 @@ public class ArchitectureTest {
     }
 
     @Test
-    void categoryDoesNotDependOnIngredientReceiptOrProduct() {
+    void categoryDoesNotDependOnIngredientRecipeOrProduct() {
         ArchRule rule = noClasses().that().resideInAPackage(pkg("category"))
                 .should().dependOnClassesThat().resideInAnyPackage(
                         pkg("ingredient"), pkg("recipe"), pkg("product"));
