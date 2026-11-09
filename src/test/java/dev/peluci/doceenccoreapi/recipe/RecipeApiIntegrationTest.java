@@ -148,10 +148,26 @@ public class RecipeApiIntegrationTest {
                 .andExpect(jsonPath("$[1].id").value(brigadeiro.toString()))
                 .andExpect(jsonPath("$[1].name").value("brigadeiro"))
                 .andExpect(jsonPath("$[1].itemCount").value(2))
+                .andExpect(jsonPath("$[1].archivedIngredientCount").value(0))
                 .andExpect(jsonPath("$[1].totalCost").value(10.6))
                 .andExpect(jsonPath("$[1].costPerYieldUnit").value(0.265))
                 .andExpect(jsonPath("$[1].items").doesNotExist())
                 .andExpect(jsonPath("$[2].name").value("Torta"));
+    }
+
+    @Test
+    void listCountsTheArchivedIngredientsOfEachRecipe() throws Exception {
+        createRecipe("Brigadeiro", item(condensedMilk, "395"), item(butter, "20"));
+        createRecipe("Calda", item(cocoa, "50"));
+
+        doPost(INGREDIENTS + "/" + butter + "/archive", "").andExpect(status().isOk());
+
+        doGet(BASE)
+                .andExpect(jsonPath("$[0].name").value("Brigadeiro"))
+                .andExpect(jsonPath("$[0].itemCount").value(2))
+                .andExpect(jsonPath("$[0].archivedIngredientCount").value(1))
+                .andExpect(jsonPath("$[1].name").value("Calda"))
+                .andExpect(jsonPath("$[1].archivedIngredientCount").value(0));
     }
 
     @Test
