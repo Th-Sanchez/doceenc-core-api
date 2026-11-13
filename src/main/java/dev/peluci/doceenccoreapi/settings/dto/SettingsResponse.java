@@ -1,5 +1,6 @@
-package dev.peluci.doceenccoreapi.settings;
+package dev.peluci.doceenccoreapi.settings.dto;
 
+import dev.peluci.doceenccoreapi.settings.Settings;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;

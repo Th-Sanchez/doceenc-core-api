@@ -1,5 +1,7 @@
 package dev.peluci.doceenccoreapi.settings;
 
+import dev.peluci.doceenccoreapi.settings.dto.SettingsResponse;
+import dev.peluci.doceenccoreapi.settings.dto.UpdateSettingsRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;

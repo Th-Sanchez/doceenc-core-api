@@ -1,4 +1,4 @@
-package dev.peluci.doceenccoreapi.settings;
+package dev.peluci.doceenccoreapi.settings.dto;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;

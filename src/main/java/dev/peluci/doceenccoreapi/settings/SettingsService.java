@@ -1,5 +1,7 @@
 package dev.peluci.doceenccoreapi.settings;
 
+import dev.peluci.doceenccoreapi.settings.dto.SettingsResponse;
+import dev.peluci.doceenccoreapi.settings.dto.UpdateSettingsRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
