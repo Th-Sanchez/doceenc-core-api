@@ -139,6 +139,12 @@ public class Product extends AuditableEntity {
                 items.stream().map(ProductItem::cost).toList());
     }
 
+    public int archivedIngredientCount() {
+        long inRecipe = recipe.getItems().stream().filter(item -> !item.getIngredient().isActive()).count();
+        long inExtras = items.stream().filter(item -> !item.getIngredient().isActive()).count();
+        return (int) (inRecipe + inExtras);
+    }
+
     public void archive() {
         this.active = false;
     }
