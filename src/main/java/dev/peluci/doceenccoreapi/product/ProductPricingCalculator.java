@@ -53,7 +53,7 @@ public final class ProductPricingCalculator {
         }
 
         if (targetMarginPercent.signum() < 0 || targetMarginPercent.compareTo(HUNDRED) >= 0) {
-            throw new IllegalArgumentException("targetMarginPercent must be in [0,100]");
+            throw new IllegalArgumentException("targetMarginPercent must be in [0, 100)");
         }
 
         BigDecimal suggested = suggestedPrice(unitCost, targetMarginPercent);
