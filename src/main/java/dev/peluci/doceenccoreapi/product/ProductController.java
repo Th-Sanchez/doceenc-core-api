@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/produts")
+@RequestMapping("/api/v1/products")
 public class ProductController {
 
     private final ProductService service;
@@ -34,6 +34,11 @@ public class ProductController {
     @GetMapping
     public List<ProductSummaryResponse> list() {
         return service.list();
+    }
+
+    @GetMapping("/{id}")
+    public ProductDetailResponse get(@PathVariable UUID id) {
+        return service.get(id);
     }
 
     @PostMapping
