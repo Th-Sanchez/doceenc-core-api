@@ -58,4 +58,9 @@ public final class Scale {
         return dividend.divide(divisor, INTERMEDIATE, ROUNDING);
     }
 
+    /** Division rounded up at the monetary scale. Use where rounding down would break a guarantee (suggested price). */
+    public static BigDecimal divideMoneyUp(BigDecimal dividend, BigDecimal divisor) {
+        return dividend.divide(divisor, MONEY, RoundingMode.UP);
+    }
+
 }

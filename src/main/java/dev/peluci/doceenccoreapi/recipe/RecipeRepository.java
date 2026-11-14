@@ -30,6 +30,4 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
 
     @Query("SELECT r FROM Recipe r WHERE LOWER(r.name) = LOWER(:name)")
     Optional<Recipe> findByName(@Param("name") String name);
-
-    List<Recipe> name(String name);
 }
