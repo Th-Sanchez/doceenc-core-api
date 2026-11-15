@@ -60,6 +60,15 @@ public class ArchitectureTest {
     }
 
     @Test
+    void customerDoesNotDependOnOtherFeatures() {
+        ArchRule rule = noClasses().that().resideInAPackage(pkg("customer"))
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        pkg("auth"), pkg("category"), pkg("ingredient"),
+                        pkg("recipe"), pkg("product"), pkg("settings"), pkg("order"));
+        rule.allowEmptyShould(true).check(mainClasses);
+    }
+
+    @Test
     void categoryDoesNotDependOnIngredientRecipeOrProduct() {
         ArchRule rule = noClasses().that().resideInAPackage(pkg("category"))
                 .should().dependOnClassesThat().resideInAnyPackage(
@@ -87,6 +96,13 @@ public class ArchitectureTest {
                 .should().dependOnClassesThat().resideInAnyPackage(
                         pkg("ingredient"), pkg("recipe"), pkg("product"));
         rule.allowEmptyShould(true).check(mainClasses);
+    }
+
+    @Test
+    void onlyOrderMayDependOnCustomer() {
+        noClasses().that().resideOutsideOfPackages(pkg("customer"), pkg("order"))
+                .should().dependOnClassesThat().resideInAPackage(pkg("customer"))
+                .check(mainClasses);
     }
 
     @Test
