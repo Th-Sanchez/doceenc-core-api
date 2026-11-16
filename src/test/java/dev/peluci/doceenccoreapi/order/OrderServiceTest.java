@@ -4,6 +4,7 @@ import dev.peluci.doceenccoreapi.customer.Customer;
 import dev.peluci.doceenccoreapi.customer.CustomerRepository;
 import dev.peluci.doceenccoreapi.customer.CustomerType;
 import dev.peluci.doceenccoreapi.product.ProductRepository;
+import dev.peluci.doceenccoreapi.shared.config.ClockConfig;
 import dev.peluci.doceenccoreapi.shared.error.ApiException;
 import dev.peluci.doceenccoreapi.shared.error.ErrorCode;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,6 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,7 +28,7 @@ public class OrderServiceTest {
 
     private final OrderService service = new OrderService(orders, mock(CustomerRepository.class),
             mock(ProductRepository.class), mock(AuditingHandler.class),
-            Clock.fixed(Instant.parse("2026-11-16T12:00:00Z"), ZoneOffset.UTC));
+            Clock.fixed(Instant.parse("2026-11-16T12:00:00Z"), ClockConfig.BUSINESS_ZONE));
 
     @Test
     void aVersionConflictOnSaveBecomesConcurrentModification() {

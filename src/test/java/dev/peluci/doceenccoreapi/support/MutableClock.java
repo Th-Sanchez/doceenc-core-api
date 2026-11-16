@@ -1,10 +1,11 @@
 package dev.peluci.doceenccoreapi.support;
 
+import dev.peluci.doceenccoreapi.shared.config.ClockConfig;
+
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 
 public class MutableClock extends Clock {
 
@@ -20,7 +21,7 @@ public class MutableClock extends Clock {
 
     @Override
     public ZoneId getZone() {
-        return ZoneOffset.UTC;
+        return ClockConfig.BUSINESS_ZONE;
     }
 
     @Override
