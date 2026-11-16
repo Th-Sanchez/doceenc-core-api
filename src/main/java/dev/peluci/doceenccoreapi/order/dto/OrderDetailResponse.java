@@ -9,6 +9,7 @@ import dev.peluci.doceenccoreapi.order.OrderStatus;
 import dev.peluci.doceenccoreapi.order.PriceChannel;
 import dev.peluci.doceenccoreapi.order.PricedOrder;
 import dev.peluci.doceenccoreapi.order.PricedOrder.PricedLine;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -17,25 +18,31 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-public record OrderDetailResponse(
-        UUID id,
-        Long orderNumber,
-        OrderStatus status,
-        CustomerSummary customer,
-        FulfillmentType fulfillmentType,
-        PriceChannel priceChannel,
-        String deliveryAddress,
-        LocalDate deliveryDate,
-        String notes,
-        List<ItemResponse> items,
-        BigDecimal totalAmount,
-        Instant confirmedAt,
-        Instant deliveredAt,
-        Instant cancelledAt,
-        Instant createdAt,
-        Instant updatedAt) {
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
-    public record CustomerSummary(UUID id, String name, CustomerType type, String storeName) {
+public record OrderDetailResponse(
+        @Schema(requiredMode = REQUIRED) UUID id,
+        @Schema(requiredMode = REQUIRED) Long orderNumber,
+        @Schema(requiredMode = REQUIRED) OrderStatus status,
+        @Schema(requiredMode = REQUIRED) CustomerSummary customer,
+        @Schema(requiredMode = REQUIRED) FulfillmentType fulfillmentType,
+        @Schema(requiredMode = REQUIRED, nullable = true) PriceChannel priceChannel,
+        @Schema(requiredMode = REQUIRED, nullable = true) String deliveryAddress,
+        @Schema(requiredMode = REQUIRED, nullable = true) LocalDate deliveryDate,
+        @Schema(requiredMode = REQUIRED, nullable = true) String notes,
+        @Schema(requiredMode = REQUIRED) List<ItemResponse> items,
+        @Schema(requiredMode = REQUIRED, nullable = true) BigDecimal totalAmount,
+        @Schema(requiredMode = REQUIRED, nullable = true) Instant confirmedAt,
+        @Schema(requiredMode = REQUIRED, nullable = true) Instant deliveredAt,
+        @Schema(requiredMode = REQUIRED, nullable = true) Instant cancelledAt,
+        @Schema(requiredMode = REQUIRED) Instant createdAt,
+        @Schema(requiredMode = REQUIRED) Instant updatedAt) {
+
+    public record CustomerSummary(
+            @Schema(requiredMode = REQUIRED) UUID id,
+            @Schema(requiredMode = REQUIRED) String name,
+            @Schema(requiredMode = REQUIRED) CustomerType type,
+            @Schema(requiredMode = REQUIRED, nullable = true) String storeName) {
 
         static CustomerSummary from(Customer customer) {
             return new CustomerSummary(customer.getId(), customer.getName(), customer.getType(), customer.getStoreName());
@@ -43,8 +50,14 @@ public record OrderDetailResponse(
 
     }
 
-    public record ItemResponse(UUID productId, String productName, int quantity, BigDecimal unitPrice,
-                               BigDecimal unitCost, BigDecimal subtotal, LineIssue issue) {
+    public record ItemResponse(
+            @Schema(requiredMode = REQUIRED) UUID productId,
+            @Schema(requiredMode = REQUIRED) String productName,
+            @Schema(requiredMode = REQUIRED) int quantity,
+            @Schema(requiredMode = REQUIRED, nullable = true) BigDecimal unitPrice,
+            @Schema(requiredMode = REQUIRED, nullable = true) BigDecimal unitCost,
+            @Schema(requiredMode = REQUIRED, nullable = true) BigDecimal subtotal,
+            @Schema(requiredMode = REQUIRED, nullable = true) LineIssue issue) {
 
         static ItemResponse from(PricedLine line) {
             return new ItemResponse(line.item().getProduct().getId(), line.productName(),

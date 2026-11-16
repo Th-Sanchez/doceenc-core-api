@@ -4,22 +4,28 @@ import dev.peluci.doceenccoreapi.customer.Customer;
 import dev.peluci.doceenccoreapi.order.FulfillmentType;
 import dev.peluci.doceenccoreapi.order.Order;
 import dev.peluci.doceenccoreapi.order.OrderStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record OrderSummaryResponse(
-        UUID id,
-        Long orderNumber,
-        OrderStatus status,
-        CustomerSummary customer,
-        FulfillmentType fulfillmentType,
-        LocalDate deliveryDate,
-        int itemCount,
-        BigDecimal totalAmount) {
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
-    public record CustomerSummary(UUID id, String name, String storeName) {
+public record OrderSummaryResponse(
+        @Schema(requiredMode = REQUIRED) UUID id,
+        @Schema(requiredMode = REQUIRED) Long orderNumber,
+        @Schema(requiredMode = REQUIRED) OrderStatus status,
+        @Schema(requiredMode = REQUIRED) CustomerSummary customer,
+        @Schema(requiredMode = REQUIRED) FulfillmentType fulfillmentType,
+        @Schema(requiredMode = REQUIRED, nullable = true) LocalDate deliveryDate,
+        @Schema(requiredMode = REQUIRED) int itemCount,
+        @Schema(requiredMode = REQUIRED, nullable = true) BigDecimal totalAmount) {
+
+    public record CustomerSummary(
+            @Schema(requiredMode = REQUIRED) UUID id,
+            @Schema(requiredMode = REQUIRED) String name,
+            @Schema(requiredMode = REQUIRED, nullable = true) String storeName) {
 
         static CustomerSummary from(Customer customer) {
             return new CustomerSummary(customer.getId(), customer.getName(), customer.getStoreName());
