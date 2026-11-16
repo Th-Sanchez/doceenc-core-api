@@ -72,12 +72,15 @@ public record PricedOrder(Order order, PriceChannel channel, List<PricedLine> li
     }
 
     private static Item calculatorItem(OrderItem item) {
-        Product product = item.getProduct();
-        return new Item(product.getRetailPrice(), product.getWholesalePrice(),
-                product.unitCost().total(), item.getQuantity());
+        return itemFor(item.getProduct(), item.getQuantity());
     }
 
-    private static PriceChannel channelOf(Customer customer) {
+    static Item itemFor(Product product, int quantity) {
+        return new Item(product.getRetailPrice(), product.getWholesalePrice(),
+                product.unitCost().total(), quantity);
+    }
+
+    static PriceChannel channelOf(Customer customer) {
         return switch (customer.getType()) {
             case RETAIL -> PriceChannel.RETAIL;
             case WHOLESALE -> PriceChannel.WHOLESALE;

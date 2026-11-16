@@ -7,6 +7,8 @@ import dev.peluci.doceenccoreapi.order.PricedOrder.PricedLine;
 import dev.peluci.doceenccoreapi.order.dto.OrderDetailResponse;
 import dev.peluci.doceenccoreapi.order.dto.OrderItemRequest;
 import dev.peluci.doceenccoreapi.order.dto.OrderRequest;
+import dev.peluci.doceenccoreapi.order.dto.OrderSimulationResponse;
+import dev.peluci.doceenccoreapi.order.dto.OrderSimulationResquest;
 import dev.peluci.doceenccoreapi.order.dto.OrderSummaryResponse;
 import dev.peluci.doceenccoreapi.product.Product;
 import dev.peluci.doceenccoreapi.product.ProductRepository;
@@ -22,7 +24,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +76,61 @@ public class OrderService {
                 PageRequest.of(page, size, LIST_ORDER));
         return PageResponse.from(found, order ->
                 OrderSummaryResponse.from(order, PricedOrder.totalOf(order)));
+    }
+
+    @Transactional(readOnly = true)
+    public OrderSimulationResponse simulate(OrderSimulationResquest request) {
+        PriceChannel channel = PricedOrder.channelOf(loadActiveCustomer(request.customerId()));
+        List<OrderItemRequest> items = request.items();
+
+        Map<UUID, Product> byId = loadProducts(items.stream()
+                .map(OrderItemRequest::productId).collect(Collectors.toSet()));
+
+        LineIssue[] issues = new LineIssue[items.size()];
+        List<Integer> priceable = new ArrayList<>();
+        Set<UUID> seen = new HashSet<>();
+
+        for (int i = 0; i < items.size(); i++) {
+            UUID productId = items.get(i).productId();
+            Product product = byId.get(productId);
+
+            if(!seen.add(productId)) {
+                issues[i] = LineIssue.DUPLICATE;
+            } else if (product == null) {
+                issues[i] = LineIssue.NOT_FOUND;
+            } else if (!product.isActive()) {
+                issues[i] = LineIssue.ARCHIVED;
+            } else {
+                priceable.add(i);
+            }
+        }
+
+        OrderPricingCalculator.Result result = OrderPricingCalculator.calculate(channel, priceable.stream()
+                .map(i -> PricedOrder.itemFor(byId.get(items.get(i).productId()), items.get(i).quantity()))
+                .toList());
+
+        List<OrderSimulationResponse.ItemResponse> lines = new ArrayList<>();
+        int nextPriced = 0;
+
+        for (int i = 0; i < items.size(); i++) {
+            OrderItemRequest item = items.get(i);
+            Product product = byId.get(item.productId());
+            String name = product != null ? product.getName() : null;
+
+            if (issues[i] != null) {
+                lines.add(new OrderSimulationResponse.ItemResponse(item.productId(), name, item.quantity(),
+                        null, null, null, issues[i]));
+                continue;
+            }
+
+            OrderPricingCalculator.Line line = result.lines().get(nextPriced++);
+            boolean priced = line.status() == OrderPricingCalculator.LineStatus.PRICED;
+            lines.add(new OrderSimulationResponse.ItemResponse(item.productId(), name, item.quantity(),
+                    line.unitPrice(), line.unitCost(), line.subtotal(), priced ? null : LineIssue.NO_PRICE));
+        }
+
+        BigDecimal total = result.total();
+        return new OrderSimulationResponse(channel, lines, total);
     }
 
     @Transactional(readOnly = true)
@@ -164,6 +223,15 @@ public class OrderService {
         return customer;
     }
 
+    private Map<UUID, Product> loadProducts(Set<UUID> ids) {
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+
+        return products.findAllByIdIn(ids).stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+    }
+
     private static void requireActive(Customer customer) {
         if (!customer.isActive()) {
             throw new ApiException(HttpStatus.UNPROCESSABLE_CONTENT, ErrorCode.ARCHIVED_CUSTOMER_NOT_ALLOWED,
@@ -180,8 +248,7 @@ public class OrderService {
             }
         }
 
-        Map<UUID, Product> byId = products.findAllByIdIn(seen).stream()
-                .collect(Collectors.toMap(Product::getId, Function.identity()));
+        Map<UUID, Product> byId = loadProducts(seen);
 
         return items.stream().map(item -> {
             Product product = byId.get(item.productId());

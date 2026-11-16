@@ -2,6 +2,8 @@ package dev.peluci.doceenccoreapi.order;
 
 import dev.peluci.doceenccoreapi.order.dto.OrderDetailResponse;
 import dev.peluci.doceenccoreapi.order.dto.OrderRequest;
+import dev.peluci.doceenccoreapi.order.dto.OrderSimulationResponse;
+import dev.peluci.doceenccoreapi.order.dto.OrderSimulationResquest;
 import dev.peluci.doceenccoreapi.order.dto.OrderSummaryResponse;
 import dev.peluci.doceenccoreapi.shared.PageResponse;
 import jakarta.validation.Valid;
@@ -46,6 +48,11 @@ public class OrderController {
     @GetMapping("/{id}")
     public OrderDetailResponse get(@PathVariable UUID id) {
         return service.get(id);
+    }
+
+    @PostMapping("/simulation")
+    public OrderSimulationResponse simulate(@Valid @RequestBody OrderSimulationResquest request) {
+        return service.simulate(request);
     }
 
     @PostMapping
