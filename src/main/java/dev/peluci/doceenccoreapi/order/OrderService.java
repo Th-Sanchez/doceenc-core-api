@@ -7,12 +7,17 @@ import dev.peluci.doceenccoreapi.order.PricedOrder.PricedLine;
 import dev.peluci.doceenccoreapi.order.dto.OrderDetailResponse;
 import dev.peluci.doceenccoreapi.order.dto.OrderItemRequest;
 import dev.peluci.doceenccoreapi.order.dto.OrderRequest;
+import dev.peluci.doceenccoreapi.order.dto.OrderSummaryResponse;
 import dev.peluci.doceenccoreapi.product.Product;
 import dev.peluci.doceenccoreapi.product.ProductRepository;
+import dev.peluci.doceenccoreapi.shared.PageResponse;
 import dev.peluci.doceenccoreapi.shared.error.ApiException;
 import dev.peluci.doceenccoreapi.shared.error.ErrorCode;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +35,10 @@ import java.util.stream.Collectors;
 @Transactional
 public class OrderService {
 
+    public static final int MAX_PAGE_SIZE = 100;
+
+    private static final Sort LIST_ORDER = Sort.by(Sort.Order.asc("deliveryDate"), Sort.Order.asc("orderNumber"));
+
     private final OrderRepository orders;
     private final CustomerRepository customers;
     private final ProductRepository products;
@@ -42,6 +51,27 @@ public class OrderService {
         this.products = products;
         this.auditingHandler = auditingHandler;
         this.clock = clock;
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<OrderSummaryResponse> list(OrderFilter filter, int page, int size) {
+        if (page < 0) {
+            throw invalidQuery("page must not be negative.");
+        }
+
+        if (size < 1 || size > MAX_PAGE_SIZE) {
+            throw invalidQuery("size must be between 1 and " + MAX_PAGE_SIZE + ".");
+        }
+
+        if (filter.deliveryFrom() != null && filter.deliveryTo() != null
+                && filter.deliveryFrom().isAfter(filter.deliveryTo())) {
+            throw invalidQuery("deliveryFrom must not be after deliveryTo.");
+        }
+
+        Page<Order> found = orders.findAll(OrderSpecifications.matching(filter),
+                PageRequest.of(page, size, LIST_ORDER));
+        return PageResponse.from(found, order ->
+                OrderSummaryResponse.from(order, PricedOrder.totalOf(order)));
     }
 
     @Transactional(readOnly = true)
@@ -110,6 +140,10 @@ public class OrderService {
             throw new ApiException(HttpStatus.CONFLICT, ErrorCode.CONCURRENT_MODIFICATION,
                     "The order was changed by another request. Reload it and try again.");
         }
+    }
+
+    private static ApiException invalidQuery(String message) {
+        return new ApiException(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_FAILED, message);
     }
 
     private OrderDetailResponse detail(Order order) {

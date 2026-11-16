@@ -2,7 +2,10 @@ package dev.peluci.doceenccoreapi.order;
 
 import dev.peluci.doceenccoreapi.order.dto.OrderDetailResponse;
 import dev.peluci.doceenccoreapi.order.dto.OrderRequest;
+import dev.peluci.doceenccoreapi.order.dto.OrderSummaryResponse;
+import dev.peluci.doceenccoreapi.shared.PageResponse;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,10 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,6 +30,17 @@ public class OrderController {
 
     public OrderController(OrderService service) {
         this.service = service;
+    }
+
+    @GetMapping
+    public PageResponse<OrderSummaryResponse> list(
+            @RequestParam(required = false) List<OrderStatus> status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deliveryFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deliveryTo,
+            @RequestParam(required = false) UUID customerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return service.list(new OrderFilter(status, deliveryFrom, deliveryTo, customerId), page, size);
     }
 
     @GetMapping("/{id}")
@@ -44,17 +61,17 @@ public class OrderController {
         return service.update(id, request);
     }
 
-    @PutMapping("/{id}/confirm")
+    @PostMapping("/{id}/confirm")
     public OrderDetailResponse confirm(@PathVariable UUID id) {
         return service.confirm(id);
     }
 
-    @PutMapping("/{id}/deliver")
+    @PostMapping("/{id}/deliver")
     public OrderDetailResponse deliver(@PathVariable UUID id) {
         return service.deliver(id);
     }
 
-    @PutMapping("/{id}/cancel")
+    @PostMapping("/{id}/cancel")
     public OrderDetailResponse cancel(@PathVariable UUID id) {
         return service.cancel(id);
     }

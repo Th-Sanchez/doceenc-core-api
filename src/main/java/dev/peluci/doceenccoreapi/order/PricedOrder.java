@@ -3,6 +3,7 @@ package dev.peluci.doceenccoreapi.order;
 import dev.peluci.doceenccoreapi.customer.Customer;
 import dev.peluci.doceenccoreapi.order.OrderPricingCalculator.Item;
 import dev.peluci.doceenccoreapi.order.OrderPricingCalculator.Line;
+import dev.peluci.doceenccoreapi.order.OrderPricingCalculator.LineStatus;
 import dev.peluci.doceenccoreapi.order.OrderPricingCalculator.Result;
 import dev.peluci.doceenccoreapi.product.Product;
 
@@ -20,6 +21,10 @@ public record PricedOrder(Order order, PriceChannel channel, List<PricedLine> li
 
     public static PricedOrder of(Order order) {
         return order.isPending() ? live(order) : frozen(order);
+    }
+
+    public static BigDecimal totalOf(Order order) {
+        return order.isPending() ? live(order).total() : order.getTotalAmount();
     }
 
     private static PricedOrder live(Order order) {
@@ -43,15 +48,14 @@ public record PricedOrder(Order order, PriceChannel channel, List<PricedLine> li
             if (line == null) {
                 return new PricedLine(item, product.getName(), null, null, null, LineIssue.ARCHIVED);
             }
-
-            if (line.status() == OrderPricingCalculator.LineStatus.NO_PRICE) {
+            if (line.status() == LineStatus.NO_PRICE) {
                 return new PricedLine(item, product.getName(), null, line.unitCost(), null, LineIssue.NO_PRICE);
             }
 
             return new PricedLine(item, product.getName(), line.unitPrice(), line.unitCost(), line.subtotal(), null);
         }).toList();
 
-        return new PricedOrder(order, order.getPriceChannel(), lines, order.getTotalAmount(), null);
+        return new PricedOrder(order, channel, lines, result.total(), result);
     }
 
     private static PricedOrder frozen(Order order) {
