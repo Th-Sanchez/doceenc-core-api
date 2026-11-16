@@ -25,7 +25,7 @@ public class RequiredHeaderFilter extends OncePerRequestFilter {
         String header = request.getHeader(HEADER_NAME);
         if (changesState && (header == null || header.isBlank())) {
             ProblemResponseWriter.write(response, HttpStatus.FORBIDDEN, ErrorCode.MISSING_CSRF_HEADER,
-                    "Forbidden", "Missing required header" + HEADER_NAME + ".");
+                    "Forbidden", "Missing required header " + HEADER_NAME + ".");
             return;
         }
         filterChain.doFilter(request, response);

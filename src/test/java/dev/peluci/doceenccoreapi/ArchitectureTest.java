@@ -47,7 +47,8 @@ public class ArchitectureTest {
         ArchRule rule = noClasses().that().resideInAPackage(pkg("shared"))
                 .should().dependOnClassesThat().resideInAnyPackage(
                         pkg("auth"), pkg("category"), pkg("ingredient"),
-                        pkg("recipe"), pkg("product"), pkg("settings"));
+                        pkg("recipe"), pkg("product"), pkg("settings"),
+                        pkg("customer"), pkg("order"));
         rule.allowEmptyShould(true).check(mainClasses);
     }
 
@@ -103,6 +104,23 @@ public class ArchitectureTest {
         noClasses().that().resideOutsideOfPackages(pkg("customer"), pkg("order"))
                 .should().dependOnClassesThat().resideInAPackage(pkg("customer"))
                 .check(mainClasses);
+    }
+
+    @Test
+    void orderOnlyDependsOnProductAndCustomer() {
+        ArchRule rule = noClasses().that().resideInAPackage(pkg("order"))
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        pkg("auth"), pkg("category"), pkg("ingredient"), pkg("recipe"), pkg("settings"));
+        rule.allowEmptyShould(true).check(mainClasses);
+    }
+
+    @Test
+    void theCatalogAndCustomersDoNotDependOnOrder() {
+        ArchRule rule = noClasses().that().resideInAnyPackage(
+                        pkg("auth"), pkg("category"), pkg("ingredient"), pkg("recipe"),
+                        pkg("product"), pkg("settings"), pkg("customer"), pkg("shared"))
+                .should().dependOnClassesThat().resideInAPackage(pkg("order"));
+        rule.allowEmptyShould(true).check(mainClasses);
     }
 
     @Test
