@@ -11,6 +11,7 @@ import dev.peluci.doceenccoreapi.product.Product;
 import dev.peluci.doceenccoreapi.product.ProductRepository;
 import dev.peluci.doceenccoreapi.shared.error.ApiException;
 import dev.peluci.doceenccoreapi.shared.error.ErrorCode;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -57,7 +58,7 @@ public class OrderService {
         order.replaceItems(drafts);
 
         assertLinesUsable(PricedOrder.of(order));
-        return detail(orders.saveAndFlush(order));
+        return detail(save(order));
     }
 
     public OrderDetailResponse update(UUID id, OrderRequest request) {
@@ -75,7 +76,7 @@ public class OrderService {
         if (itemsChanged) {
             auditingHandler.markModified(order);
         }
-        return detail(orders.saveAndFlush(order));
+        return detail(save(order));
     }
 
     public OrderDetailResponse confirm(UUID id) {
@@ -87,19 +88,28 @@ public class OrderService {
         assertLinesUsable(priced);
 
         order.confirm(clock.instant(), priced.channel(), priced.calculation());
-        return detail(orders.saveAndFlush(order));
+        return detail(save(order));
     }
 
     public OrderDetailResponse deliver(UUID id) {
         Order order = load(id);
         order.deliver(clock.instant());
-        return detail(orders.saveAndFlush(order));
+        return detail(save(order));
     }
 
     public OrderDetailResponse cancel(UUID id) {
         Order order = load(id);
         order.cancel(clock.instant());
-        return detail(orders.saveAndFlush(order));
+        return detail(save(order));
+    }
+
+    private Order save(Order order) {
+        try {
+            return orders.saveAndFlush(order);
+        } catch (OptimisticLockingFailureException ex) {
+            throw new ApiException(HttpStatus.CONFLICT, ErrorCode.CONCURRENT_MODIFICATION,
+                    "The order was changed by another request. Reload it and try again.");
+        }
     }
 
     private OrderDetailResponse detail(Order order) {
