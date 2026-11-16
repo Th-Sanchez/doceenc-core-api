@@ -2,6 +2,7 @@ package dev.peluci.doceenccoreapi.order;
 
 import dev.peluci.doceenccoreapi.customer.Customer;
 import dev.peluci.doceenccoreapi.order.OrderPricingCalculator.Line;
+import dev.peluci.doceenccoreapi.order.OrderPricingCalculator.LineStatus;
 import dev.peluci.doceenccoreapi.order.OrderPricingCalculator.Result;
 import dev.peluci.doceenccoreapi.product.Product;
 import dev.peluci.doceenccoreapi.shared.error.ApiException;
@@ -39,8 +40,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-
-import static dev.peluci.doceenccoreapi.order.OrderPricingCalculator.LineStatus;
 
 @Entity
 @Table(name = "orders")
@@ -206,7 +205,7 @@ public class Order extends AuditableEntity {
             OrderItem item = items.get(i);
             Line line = pricing.lines().get(i);
 
-            if(line.status() != LineStatus.PRICED) {
+            if (line.status() != LineStatus.PRICED) {
                 throw new IllegalArgumentException("every line must be priced to confirm");
             }
 
@@ -219,7 +218,7 @@ public class Order extends AuditableEntity {
         this.status = OrderStatus.CONFIRMED;
     }
 
-    public void delivery(Instant now) {
+    public void deliver(Instant now) {
         requireTransition(OrderStatus.DELIVERED, OrderStatus.CONFIRMED);
         this.deliveredAt = Objects.requireNonNull(now, "now");
         this.status = OrderStatus.DELIVERED;
@@ -231,7 +230,7 @@ public class Order extends AuditableEntity {
         this.status = OrderStatus.CANCELLED;
     }
 
-    private void assertEditable() {
+    public void assertEditable() {
         if (status != OrderStatus.PENDING) {
             throw new ApiException(HttpStatus.CONFLICT, ErrorCode.ORDER_NOT_EDITABLE,
                     "Only a pending order can be changed.");
@@ -302,10 +301,6 @@ public class Order extends AuditableEntity {
 
     public Instant getCancelledAt() {
         return cancelledAt;
-    }
-
-    public Long getVersion() {
-        return version;
     }
 
     public List<OrderItem> getItems() {
