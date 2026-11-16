@@ -7,6 +7,7 @@ import dev.peluci.doceenccoreapi.product.Product;
 import dev.peluci.doceenccoreapi.shared.error.ApiException;
 import dev.peluci.doceenccoreapi.shared.error.ErrorCode;
 import dev.peluci.doceenccoreapi.shared.numeric.Scale;
+import dev.peluci.doceenccoreapi.shared.persistence.AuditableEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,7 +44,7 @@ import static dev.peluci.doceenccoreapi.order.OrderPricingCalculator.LineStatus;
 
 @Entity
 @Table(name = "orders")
-public class Order {
+public class Order extends AuditableEntity {
 
     public record ItemDraft(Product product, int quantity) {
     }
@@ -110,7 +111,7 @@ public class Order {
 
     public void update(Customer customer, FulfillmentType fulfillmentType, String deliveryAddress,
                  LocalDate deliveryDate, String notes) {
-        requireEditable();
+        assertEditable();
         applyDetails(customer, fulfillmentType, deliveryAddress, deliveryDate, notes);
     }
 
@@ -128,7 +129,7 @@ public class Order {
             return null;
         }
 
-        String address = requested != null ? requested : customer.getAddress();
+        String address = requested != null ? requested : blankToNull(customer.getAddress());
         if (address == null) {
             throw new ApiException(HttpStatus.UNPROCESSABLE_CONTENT, ErrorCode.DELIVERY_ADDRESS_REQUIRED,
                     "A delivery address is required: inform one or register it on the customer.");
@@ -137,9 +138,13 @@ public class Order {
         return address;
     }
 
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value;
+    }
+
     public boolean replaceItems(Collection<ItemDraft> drafts) {
         Objects.requireNonNull(drafts, "drafts");
-        requireEditable();
+        assertEditable();
 
         Map<UUID, ItemDraft> wanted = new LinkedHashMap<>();
         for (ItemDraft draft : drafts) {
@@ -222,11 +227,11 @@ public class Order {
 
     public void cancel(Instant now) {
         requireTransition(OrderStatus.CANCELLED, OrderStatus.PENDING, OrderStatus.CONFIRMED);
-        this.deliveredAt = Objects.requireNonNull(now, "now");
+        this.cancelledAt = Objects.requireNonNull(now, "now");
         this.status = OrderStatus.CANCELLED;
     }
 
-    private void requireEditable() {
+    private void assertEditable() {
         if (status != OrderStatus.PENDING) {
             throw new ApiException(HttpStatus.CONFLICT, ErrorCode.ORDER_NOT_EDITABLE,
                     "Only a pending order can be changed.");
@@ -304,6 +309,6 @@ public class Order {
     }
 
     public List<OrderItem> getItems() {
-        return items;
+        return Collections.unmodifiableList(items);
     }
 }
