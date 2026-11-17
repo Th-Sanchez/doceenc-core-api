@@ -12,6 +12,7 @@ import dev.peluci.doceenccoreapi.order.dto.OrderSimulationResquest;
 import dev.peluci.doceenccoreapi.order.dto.OrderSummaryResponse;
 import dev.peluci.doceenccoreapi.payment.PaymentMethod;
 import dev.peluci.doceenccoreapi.payment.PaymentService;
+import dev.peluci.doceenccoreapi.payment.PaymentSummaryCalculator;
 import dev.peluci.doceenccoreapi.payment.dto.PaymentRequest;
 import dev.peluci.doceenccoreapi.product.Product;
 import dev.peluci.doceenccoreapi.product.ProductRepository;
@@ -81,8 +82,9 @@ public class OrderService {
 
         Page<Order> found = orders.findAll(OrderSpecifications.matching(filter),
                 PageRequest.of(page, size, LIST_ORDER));
-        return PageResponse.from(found, order ->
-                OrderSummaryResponse.from(order, PricedOrder.totalOf(order)));
+        Map<UUID, PaymentSummaryCalculator.Summary> summaries = paymentSummaries(found.getContent());
+        return PageResponse.from(found, order -> OrderSummaryResponse.from(order,
+                PricedOrder.totalOf(order), summaries.get(order.getId())));
     }
 
     @Transactional(readOnly = true)
@@ -291,6 +293,14 @@ public class OrderService {
                         "Product " + productId + " has no " + priced.channel() + " price.");
             }
         }
+    }
+
+    private Map<UUID, PaymentSummaryCalculator.Summary> paymentSummaries(List<Order> page) {
+        List<Order> payable = page.stream().filter(Order::acceptsPayments).toList();
+        Map<UUID, BigDecimal> nets = payments.netsOf(payable.stream().map(Order::getId).toList());
+
+        return payable.stream().collect(Collectors.toMap(Order::getId,
+                order -> PaymentSummaryCalculator.summarize(order.getTotalAmount(), nets.get(order.getId()))));
     }
 
     private static String blankToNull(String value) {

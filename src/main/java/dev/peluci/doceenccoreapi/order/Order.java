@@ -45,6 +45,8 @@ import java.util.UUID;
 @Table(name = "orders")
 public class Order extends AuditableEntity {
 
+    public static final Set<OrderStatus> PAYABLE_STATUSES = Set.of(OrderStatus.CONFIRMED, OrderStatus.DELIVERED);
+
     public record ItemDraft(Product product, int quantity) {
     }
 
@@ -252,7 +254,7 @@ public class Order extends AuditableEntity {
     }
 
     public boolean acceptsPayments() {
-        return status == OrderStatus.CONFIRMED || status == OrderStatus.DELIVERED;
+        return PAYABLE_STATUSES.contains(status);
     }
 
     public UUID getId() {

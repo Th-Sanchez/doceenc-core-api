@@ -14,7 +14,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -79,6 +82,16 @@ public class PaymentService {
         return Optional.of(payments.save(new OrderPayment(orderId, PaymentType.REFUND, net, refundMethod,
                 LocalDate.now(clock), null)));
 
+    }
+
+    public Map<UUID, BigDecimal> netsOf(Collection<UUID> orderIds) {
+        Map<UUID, BigDecimal> nets = new HashMap<>();
+        orderIds.forEach(id -> nets.put(id, BigDecimal.ZERO.setScale(Scale.MONEY)));
+
+        if (!orderIds.isEmpty()) {
+            payments.netsByOrderIds(orderIds).forEach(row -> nets.put(row.getOrderId(), row.getNet()));
+        }
+        return nets;
     }
 
     public List<OrderPayment> ledgerOf(UUID orderId) {

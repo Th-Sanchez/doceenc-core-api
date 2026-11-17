@@ -14,8 +14,4 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
     @EntityGraph(attributePaths = {"customer", "items"})
     Optional<Order> findWithItemsById(UUID id);
 
-    @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
-    @EntityGraph(attributePaths = {"customer", "items"})
-    Optional<Order> findWithItemsForPaymentById(UUID id);
-
 }

@@ -32,7 +32,7 @@ public class OrderPayment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "order_id", insertable = false, updatable = false)
+    @Column(name = "order_id", nullable = false, updatable = false)
     private UUID orderId;
 
     @Enumerated(EnumType.STRING)

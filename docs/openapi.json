@@ -789,6 +789,22 @@
                                                                                        }
                                                                         },
                                                                         {
+                                                                            "name":  "paymentStatus",
+                                                                            "in":  "query",
+                                                                            "required":  false,
+                                                                            "schema":  {
+                                                                                           "type":  "array",
+                                                                                           "items":  {
+                                                                                                         "type":  "string",
+                                                                                                         "enum":  [
+                                                                                                                      "UNPAID",
+                                                                                                                      "PARTIAL",
+                                                                                                                      "PAID"
+                                                                                                                  ]
+                                                                                                     }
+                                                                                       }
+                                                                        },
+                                                                        {
                                                                             "name":  "page",
                                                                             "in":  "query",
                                                                             "required":  false,
@@ -3209,15 +3225,34 @@
                                                                                                                         "number",
                                                                                                                         "null"
                                                                                                                     ]
-                                                                                                       }
+                                                                                                       },
+                                                                                       "balance":  {
+                                                                                                       "type":  [
+                                                                                                                    "number",
+                                                                                                                    "null"
+                                                                                                                ]
+                                                                                                   },
+                                                                                       "paymentStatus":  {
+                                                                                                             "type":  [
+                                                                                                                          "string",
+                                                                                                                          "null"
+                                                                                                                      ],
+                                                                                                             "enum":  [
+                                                                                                                          "UNPAID",
+                                                                                                                          "PARTIAL",
+                                                                                                                          "PAID"
+                                                                                                                      ]
+                                                                                                         }
                                                                                    },
                                                                     "required":  [
+                                                                                     "balance",
                                                                                      "customer",
                                                                                      "deliveryDate",
                                                                                      "fulfillmentType",
                                                                                      "id",
                                                                                      "itemCount",
                                                                                      "orderNumber",
+                                                                                     "paymentStatus",
                                                                                      "status",
                                                                                      "totalAmount"
                                                                                  ]

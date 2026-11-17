@@ -7,6 +7,7 @@ import dev.peluci.doceenccoreapi.order.dto.OrderRequest;
 import dev.peluci.doceenccoreapi.order.dto.OrderSimulationResponse;
 import dev.peluci.doceenccoreapi.order.dto.OrderSimulationResquest;
 import dev.peluci.doceenccoreapi.order.dto.OrderSummaryResponse;
+import dev.peluci.doceenccoreapi.payment.PaymentStatus;
 import dev.peluci.doceenccoreapi.payment.dto.PaymentRequest;
 import dev.peluci.doceenccoreapi.shared.PageResponse;
 import jakarta.validation.Valid;
@@ -47,9 +48,10 @@ public class OrderController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deliveryFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deliveryTo,
             @RequestParam(required = false) UUID customerId,
+            @RequestParam(required = false) List<PaymentStatus> paymentStatus,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return service.list(new OrderFilter(status, deliveryFrom, deliveryTo, customerId), page, size);
+        return service.list(new OrderFilter(status, deliveryFrom, deliveryTo, customerId, paymentStatus), page, size);
     }
 
     @GetMapping("/{id}")

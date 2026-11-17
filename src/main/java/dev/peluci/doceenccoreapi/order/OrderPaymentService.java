@@ -5,6 +5,8 @@ import dev.peluci.doceenccoreapi.payment.PaymentService;
 import dev.peluci.doceenccoreapi.payment.dto.PaymentRequest;
 import dev.peluci.doceenccoreapi.shared.error.ApiException;
 import dev.peluci.doceenccoreapi.shared.error.ErrorCode;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +20,13 @@ public class OrderPaymentService {
     private final OrderRepository orders;
     private final PaymentService payments;
     private final OrderDetailAssembler assembler;
+    private final EntityManager entityManager;
 
-    public OrderPaymentService(OrderRepository orders, PaymentService payments, OrderDetailAssembler assembler) {
+    public OrderPaymentService(OrderRepository orders, PaymentService payments, OrderDetailAssembler assembler, EntityManager entityManager) {
         this.orders = orders;
         this.payments = payments;
         this.assembler = assembler;
+        this.entityManager = entityManager;
     }
 
     public OrderDetailResponse register(UUID orderId, PaymentRequest request) {
@@ -42,9 +46,11 @@ public class OrderPaymentService {
     }
 
     private Order loadForPayment(UUID orderId) {
-        return orders.findWithItemsForPaymentById(orderId)
+        Order order = orders.findWithItemsById(orderId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ErrorCode.ORDER_NOT_FOUND,
                         "Order not found."));
+        entityManager.lock(order, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+        return order;
     }
 
     private static void requireAcceptsPayments(Order order) {

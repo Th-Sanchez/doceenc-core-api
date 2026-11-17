@@ -5,9 +5,12 @@ import dev.peluci.doceenccoreapi.payment.PaymentService;
 import dev.peluci.doceenccoreapi.payment.dto.PaymentRequest;
 import dev.peluci.doceenccoreapi.shared.error.ApiException;
 import dev.peluci.doceenccoreapi.shared.error.ErrorCode;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -15,6 +18,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -27,7 +31,8 @@ class OrderPaymentServiceTest {
     private final OrderRepository orders = mock(OrderRepository.class);
     private final PaymentService payments = mock(PaymentService.class);
     private final OrderDetailAssembler assembler = mock(OrderDetailAssembler.class);
-    private final OrderPaymentService service = new OrderPaymentService(orders, payments, assembler);
+    private final EntityManager entityManager = mock(EntityManager.class);
+    private final OrderPaymentService service = new OrderPaymentService(orders, payments, assembler, entityManager);
 
     private final UUID orderId = UUID.randomUUID();
     private final Order order = mock(Order.class);
@@ -38,7 +43,7 @@ class OrderPaymentServiceTest {
     void setUp() {
         when(order.acceptsPayments()).thenReturn(true);
         when(order.getTotalAmount()).thenReturn(TOTAL);
-        when(orders.findWithItemsForPaymentById(orderId)).thenReturn(Optional.of(order));
+        when(orders.findWithItemsById(orderId)).thenReturn(Optional.of(order));
     }
 
     @Test
@@ -88,6 +93,15 @@ class OrderPaymentServiceTest {
     void voidOnAnUnknownOrderIsNotFound() {
         assertFailsWith(() -> service.voidPayment(UUID.randomUUID(), UUID.randomUUID()),
                 ErrorCode.ORDER_NOT_FOUND);
+    }
+
+    @Test
+    void theOrderIsLockedWithAForcedVersionIncrementBeforeTheLedgerIsChanged() {
+        service.register(orderId, request);
+
+        InOrder inOrder = inOrder(entityManager, payments);
+        inOrder.verify(entityManager).lock(order, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
+        inOrder.verify(payments).register(orderId, TOTAL, request);
     }
 
     private static void assertFailsWith(ThrowingCallable call, ErrorCode code) {

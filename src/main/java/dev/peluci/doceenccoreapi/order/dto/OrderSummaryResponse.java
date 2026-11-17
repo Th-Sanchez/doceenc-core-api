@@ -4,6 +4,8 @@ import dev.peluci.doceenccoreapi.customer.Customer;
 import dev.peluci.doceenccoreapi.order.FulfillmentType;
 import dev.peluci.doceenccoreapi.order.Order;
 import dev.peluci.doceenccoreapi.order.OrderStatus;
+import dev.peluci.doceenccoreapi.payment.PaymentStatus;
+import dev.peluci.doceenccoreapi.payment.PaymentSummaryCalculator;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
@@ -20,7 +22,9 @@ public record OrderSummaryResponse(
         @Schema(requiredMode = REQUIRED) FulfillmentType fulfillmentType,
         @Schema(requiredMode = REQUIRED, nullable = true) LocalDate deliveryDate,
         @Schema(requiredMode = REQUIRED) int itemCount,
-        @Schema(requiredMode = REQUIRED, nullable = true) BigDecimal totalAmount) {
+        @Schema(requiredMode = REQUIRED, nullable = true) BigDecimal totalAmount,
+        @Schema(requiredMode = REQUIRED, nullable = true) BigDecimal balance,
+        @Schema(requiredMode = REQUIRED, nullable = true) PaymentStatus paymentStatus) {
 
     public record CustomerSummary(
             @Schema(requiredMode = REQUIRED) UUID id,
@@ -33,10 +37,13 @@ public record OrderSummaryResponse(
 
     }
 
-    public static OrderSummaryResponse from(Order order, BigDecimal totalAmount) {
+    public static OrderSummaryResponse from(Order order, BigDecimal totalAmount,
+                                            PaymentSummaryCalculator.Summary payment) {
         return new OrderSummaryResponse(order.getId(),  order.getOrderNumber(), order.getStatus(),
                 CustomerSummary.from(order.getCustomer()), order.getFulfillmentType(), order.getDeliveryDate(),
-                order.getItems().size(), totalAmount);
+                order.getItems().size(), totalAmount,
+                payment == null ? null : payment.balance(),
+                payment == null ? null : payment.status());
     }
 
 }
