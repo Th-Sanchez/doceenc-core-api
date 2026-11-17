@@ -10,12 +10,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -35,10 +32,6 @@ public class OrderPayment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "order_id", nullable = false, updatable = false)
-    private Order order;
 
     @Column(name = "order_id", insertable = false, updatable = false)
     private UUID orderId;
@@ -70,9 +63,8 @@ public class OrderPayment {
     protected OrderPayment() {
     }
 
-    public OrderPayment(Order order, PaymentType type, BigDecimal amount, PaymentMethod method, LocalDate paidOn, String notes) {
-        this.order = Objects.requireNonNull(order, "order");
-        this.orderId = order.getId();
+    public OrderPayment(UUID orderId, PaymentType type, BigDecimal amount, PaymentMethod method, LocalDate paidOn, String notes) {
+        this.orderId = orderId;
         this.type = Objects.requireNonNull(type, "type");
         this.amount = Objects.requireNonNull(amount, "amount");
         this.method = Objects.requireNonNull(method, "method");
@@ -108,10 +100,6 @@ public class OrderPayment {
 
     public UUID getId() {
         return id;
-    }
-
-    public Order getOrder() {
-        return order;
     }
 
     public UUID getOrderId() {

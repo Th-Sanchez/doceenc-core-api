@@ -9,6 +9,10 @@ import dev.peluci.doceenccoreapi.order.OrderStatus;
 import dev.peluci.doceenccoreapi.order.PriceChannel;
 import dev.peluci.doceenccoreapi.order.PricedOrder;
 import dev.peluci.doceenccoreapi.order.PricedOrder.PricedLine;
+import dev.peluci.doceenccoreapi.payment.OrderPayment;
+import dev.peluci.doceenccoreapi.payment.PaymentStatus;
+import dev.peluci.doceenccoreapi.payment.PaymentSummaryCalculator;
+import dev.peluci.doceenccoreapi.payment.dto.PaymentResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
@@ -32,6 +36,10 @@ public record OrderDetailResponse(
         @Schema(requiredMode = REQUIRED, nullable = true) String notes,
         @Schema(requiredMode = REQUIRED) List<ItemResponse> items,
         @Schema(requiredMode = REQUIRED, nullable = true) BigDecimal totalAmount,
+        @Schema(requiredMode = REQUIRED) List<PaymentResponse> payments,
+        @Schema(requiredMode = REQUIRED, nullable = true) BigDecimal paidAmount,
+        @Schema(requiredMode = REQUIRED, nullable = true) BigDecimal balance,
+        @Schema(requiredMode = REQUIRED, nullable = true) PaymentStatus paymentStatus,
         @Schema(requiredMode = REQUIRED, nullable = true) Instant confirmedAt,
         @Schema(requiredMode = REQUIRED, nullable = true) Instant deliveredAt,
         @Schema(requiredMode = REQUIRED, nullable = true) Instant cancelledAt,
@@ -66,7 +74,7 @@ public record OrderDetailResponse(
 
     }
 
-    public static OrderDetailResponse from(PricedOrder priced) {
+    public static OrderDetailResponse from(PricedOrder priced, List<OrderPayment> ledger) {
         Order order = priced.order();
 
         List<ItemResponse> items = priced.lines().stream()
@@ -74,10 +82,16 @@ public record OrderDetailResponse(
                 .sorted(Comparator.comparing(ItemResponse::productName, String.CASE_INSENSITIVE_ORDER))
                 .toList();
 
+        List<PaymentResponse> payments = ledger.stream().map(PaymentResponse::from).toList();
+        PaymentSummaryCalculator.Summary summary = order.acceptsPayments()
+                ? PaymentSummaryCalculator.summarize(order.getTotalAmount(), ledger.stream().map(OrderPayment::toEntry).toList())
+                : null;
+
         return new OrderDetailResponse(order.getId(), order.getOrderNumber(), order.getStatus(),
                 CustomerSummary.from(order.getCustomer()), order.getFulfillmentType(), priced.channel(),
                 order.getDeliveryAddress(), order.getDeliveryDate(), order.getNotes(), items, priced.total(),
-                order.getConfirmedAt(), order.getDeliveredAt(), order.getCancelledAt(),
-                order.getCreatedAt(), order.getUpdatedAt());
+                payments, summary == null ? null : summary.paidAmount(), summary == null ? null : summary.balance(),
+                summary == null ? null : summary.status(), order.getConfirmedAt(), order.getDeliveredAt(),
+                order.getCancelledAt(), order.getCreatedAt(), order.getUpdatedAt());
     }
 }

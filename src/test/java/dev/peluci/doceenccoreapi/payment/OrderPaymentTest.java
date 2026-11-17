@@ -1,6 +1,5 @@
 package dev.peluci.doceenccoreapi.payment;
 
-import dev.peluci.doceenccoreapi.order.Order;
 import dev.peluci.doceenccoreapi.shared.error.ApiException;
 import dev.peluci.doceenccoreapi.shared.error.ErrorCode;
 import org.junit.jupiter.api.Test;
@@ -8,16 +7,16 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 
 class OrderPaymentTest {
 
     private static final Instant NOW = Instant.parse("2026-12-01T15:00:00Z");
 
-    private final Order order = mock(Order.class);
+    private final UUID orderId = UUID.randomUUID();
 
     @Test
     void aPaymentCanBeVoidedOnce() {
@@ -50,6 +49,7 @@ class OrderPaymentTest {
         OrderPayment payment = payment(PaymentType.PAYMENT, "50.00");
 
         assertThat(payment.isVoided()).isFalse();
+        assertThat(payment.getOrderId()).isEqualTo(orderId);
         assertThat(payment.toEntry())
                 .isEqualTo(new PaymentSummaryCalculator.Entry(PaymentType.PAYMENT, new BigDecimal("50.00"), false));
     }
@@ -63,7 +63,7 @@ class OrderPaymentTest {
     }
 
     private OrderPayment payment(PaymentType type, String amount) {
-        return new OrderPayment(order, type, new BigDecimal(amount), PaymentMethod.PIX,
+        return new OrderPayment(orderId, type, new BigDecimal(amount), PaymentMethod.PIX,
                 LocalDate.of(2026, 12, 1), null);
     }
 }

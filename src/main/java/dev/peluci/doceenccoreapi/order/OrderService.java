@@ -48,13 +48,15 @@ public class OrderService {
     private final ProductRepository products;
     private final AuditingHandler auditingHandler;
     private final Clock clock;
+    private final OrderDetailAssembler assembler;
 
-    public OrderService(OrderRepository orders, CustomerRepository customers, ProductRepository products, AuditingHandler auditingHandler, Clock clock) {
+    public OrderService(OrderRepository orders, CustomerRepository customers, ProductRepository products, AuditingHandler auditingHandler, Clock clock, OrderDetailAssembler assembler) {
         this.orders = orders;
         this.customers = customers;
         this.products = products;
         this.auditingHandler = auditingHandler;
         this.clock = clock;
+        this.assembler = assembler;
     }
 
     @Transactional(readOnly = true)
@@ -206,7 +208,7 @@ public class OrderService {
     }
 
     private OrderDetailResponse detail(Order order) {
-        return OrderDetailResponse.from(PricedOrder.of(order));
+        return assembler.assemble(order);
     }
 
     private Order load(UUID id) {

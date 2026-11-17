@@ -3,6 +3,7 @@ package dev.peluci.doceenccoreapi.shared.error;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -27,6 +28,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     ProblemDetail handleApiException(ApiException ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
         problem.setProperty("code", ex.getCode().name());
+        return problem;
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    ProblemDetail handleConcurrentModification(OptimisticLockingFailureException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+                "The resource was changed by another request. Reload it and try again.");
+        problem.setProperty("code", ErrorCode.CONCURRENT_MODIFICATION.name());
         return problem;
     }
 

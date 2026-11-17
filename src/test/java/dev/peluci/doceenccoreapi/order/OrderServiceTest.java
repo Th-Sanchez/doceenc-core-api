@@ -25,10 +25,11 @@ import static org.mockito.Mockito.when;
 public class OrderServiceTest {
 
     private final OrderRepository orders = mock(OrderRepository.class);
+    private final OrderDetailAssembler assembler = mock(OrderDetailAssembler.class);
 
     private final OrderService service = new OrderService(orders, mock(CustomerRepository.class),
             mock(ProductRepository.class), mock(AuditingHandler.class),
-            Clock.fixed(Instant.parse("2026-11-16T12:00:00Z"), ClockConfig.BUSINESS_ZONE));
+            Clock.fixed(Instant.parse("2026-11-16T12:00:00Z"), ClockConfig.BUSINESS_ZONE), assembler);
 
     @Test
     void aVersionConflictOnSaveBecomesConcurrentModification() {

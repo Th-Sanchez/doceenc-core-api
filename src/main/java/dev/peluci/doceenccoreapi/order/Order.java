@@ -251,6 +251,10 @@ public class Order extends AuditableEntity {
         return status == OrderStatus.PENDING;
     }
 
+    public boolean acceptsPayments() {
+        return status == OrderStatus.CONFIRMED || status == OrderStatus.DELIVERED;
+    }
+
     public UUID getId() {
         return id;
     }
