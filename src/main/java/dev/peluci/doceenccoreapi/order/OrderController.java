@@ -1,10 +1,13 @@
 package dev.peluci.doceenccoreapi.order;
 
+import dev.peluci.doceenccoreapi.order.dto.CancelRequest;
+import dev.peluci.doceenccoreapi.order.dto.ConfirmRequest;
 import dev.peluci.doceenccoreapi.order.dto.OrderDetailResponse;
 import dev.peluci.doceenccoreapi.order.dto.OrderRequest;
 import dev.peluci.doceenccoreapi.order.dto.OrderSimulationResponse;
 import dev.peluci.doceenccoreapi.order.dto.OrderSimulationResquest;
 import dev.peluci.doceenccoreapi.order.dto.OrderSummaryResponse;
+import dev.peluci.doceenccoreapi.payment.dto.PaymentRequest;
 import dev.peluci.doceenccoreapi.shared.PageResponse;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -28,10 +31,14 @@ import java.util.UUID;
 @RequestMapping("/api/v1/orders")
 public class OrderController {
 
-    private final OrderService service;
+    private static final String BASE = "/api/v1/orders";
 
-    public OrderController(OrderService service) {
+    private final OrderService service;
+    private final OrderPaymentService orderPayments;
+
+    public OrderController(OrderService service, OrderPaymentService orderPayments) {
         this.service = service;
+        this.orderPayments = orderPayments;
     }
 
     @GetMapping
@@ -69,8 +76,8 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/confirm")
-    public OrderDetailResponse confirm(@PathVariable UUID id) {
-        return service.confirm(id);
+    public OrderDetailResponse confirm(@PathVariable UUID id, @Valid @RequestBody(required = false) ConfirmRequest request) {
+        return service.confirm(id, request == null ? null : request.initialPayment());
     }
 
     @PostMapping("/{id}/deliver")
@@ -79,7 +86,21 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/cancel")
-    public OrderDetailResponse cancel(@PathVariable UUID id) {
-        return service.cancel(id);
+    public OrderDetailResponse cancel(@PathVariable UUID id, @RequestBody(required = false) CancelRequest request) {
+        return service.cancel(id, request == null ? null : request.refundMethod());
+    }
+
+    @PostMapping("/{id}/payments")
+    public ResponseEntity<OrderDetailResponse> registerPayment(@PathVariable UUID id,
+                                                               @Valid @RequestBody PaymentRequest request) {
+        OrderDetailResponse detail = orderPayments.register(id, request);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path(BASE + "/{id}").buildAndExpand(id).toUri();
+        return ResponseEntity.created(location).body(detail);
+    }
+
+    @PostMapping("/{id}/payments/{paymentId}/void")
+    public OrderDetailResponse voidPayment(@PathVariable UUID id, @PathVariable UUID paymentId) {
+        return orderPayments.voidPayment(id, paymentId);
     }
 }

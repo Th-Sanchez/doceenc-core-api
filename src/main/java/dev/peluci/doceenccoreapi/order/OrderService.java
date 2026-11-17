@@ -10,6 +10,9 @@ import dev.peluci.doceenccoreapi.order.dto.OrderRequest;
 import dev.peluci.doceenccoreapi.order.dto.OrderSimulationResponse;
 import dev.peluci.doceenccoreapi.order.dto.OrderSimulationResquest;
 import dev.peluci.doceenccoreapi.order.dto.OrderSummaryResponse;
+import dev.peluci.doceenccoreapi.payment.PaymentMethod;
+import dev.peluci.doceenccoreapi.payment.PaymentService;
+import dev.peluci.doceenccoreapi.payment.dto.PaymentRequest;
 import dev.peluci.doceenccoreapi.product.Product;
 import dev.peluci.doceenccoreapi.product.ProductRepository;
 import dev.peluci.doceenccoreapi.shared.PageResponse;
@@ -49,14 +52,16 @@ public class OrderService {
     private final AuditingHandler auditingHandler;
     private final Clock clock;
     private final OrderDetailAssembler assembler;
+    private final PaymentService payments;
 
-    public OrderService(OrderRepository orders, CustomerRepository customers, ProductRepository products, AuditingHandler auditingHandler, Clock clock, OrderDetailAssembler assembler) {
+    public OrderService(OrderRepository orders, CustomerRepository customers, ProductRepository products, AuditingHandler auditingHandler, Clock clock, OrderDetailAssembler assembler, PaymentService payments) {
         this.orders = orders;
         this.customers = customers;
         this.products = products;
         this.auditingHandler = auditingHandler;
         this.clock = clock;
         this.assembler = assembler;
+        this.payments = payments;
     }
 
     @Transactional(readOnly = true)
@@ -170,7 +175,7 @@ public class OrderService {
         return detail(save(order));
     }
 
-    public OrderDetailResponse confirm(UUID id) {
+    public OrderDetailResponse confirm(UUID id, PaymentRequest initialPayment) {
         Order order = load(id);
         order.assertCanConfirm();
         requireActive(order.getCustomer());
@@ -179,6 +184,11 @@ public class OrderService {
         assertLinesUsable(priced);
 
         order.confirm(clock.instant(), priced.channel(), priced.calculation());
+
+        if (initialPayment != null) {
+            payments.register(order.getId(), order.getTotalAmount(), initialPayment);
+        }
+
         return detail(save(order));
     }
 
@@ -188,9 +198,16 @@ public class OrderService {
         return detail(save(order));
     }
 
-    public OrderDetailResponse cancel(UUID id) {
+    public OrderDetailResponse cancel(UUID id, PaymentMethod refundMethod) {
         Order order = load(id);
+        boolean wasConfirmed = order.getStatus() == OrderStatus.CONFIRMED;
+
         order.cancel(clock.instant());
+
+        if (wasConfirmed) {
+            payments.refundNet(order.getId(), refundMethod);
+        }
+
         return detail(save(order));
     }
 

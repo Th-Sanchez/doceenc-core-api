@@ -3,6 +3,8 @@ package dev.peluci.doceenccoreapi.order;
 import dev.peluci.doceenccoreapi.customer.Customer;
 import dev.peluci.doceenccoreapi.customer.CustomerRepository;
 import dev.peluci.doceenccoreapi.customer.CustomerType;
+import dev.peluci.doceenccoreapi.payment.PaymentMethod;
+import dev.peluci.doceenccoreapi.payment.PaymentService;
 import dev.peluci.doceenccoreapi.product.ProductRepository;
 import dev.peluci.doceenccoreapi.shared.config.ClockConfig;
 import dev.peluci.doceenccoreapi.shared.error.ApiException;
@@ -29,7 +31,8 @@ public class OrderServiceTest {
 
     private final OrderService service = new OrderService(orders, mock(CustomerRepository.class),
             mock(ProductRepository.class), mock(AuditingHandler.class),
-            Clock.fixed(Instant.parse("2026-11-16T12:00:00Z"), ClockConfig.BUSINESS_ZONE), assembler);
+            Clock.fixed(Instant.parse("2026-11-16T12:00:00Z"), ClockConfig.BUSINESS_ZONE), assembler,
+            mock(PaymentService.class));
 
     @Test
     void aVersionConflictOnSaveBecomesConcurrentModification() {
@@ -39,7 +42,7 @@ public class OrderServiceTest {
         when(orders.findWithItemsById(id)).thenReturn(Optional.of(order));
         when(orders.saveAndFlush(order)).thenThrow(new ObjectOptimisticLockingFailureException(Order.class, id));
 
-        assertThatThrownBy(() -> service.cancel(id))
+        assertThatThrownBy(() -> service.cancel(id, PaymentMethod.CASH))
                 .isInstanceOfSatisfying(ApiException.class, e -> {
                     assertThat(e.getStatus()).isEqualTo(HttpStatus.CONFLICT);
                     assertThat(e.getCode()).isEqualTo(ErrorCode.CONCURRENT_MODIFICATION);

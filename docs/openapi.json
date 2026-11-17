@@ -851,6 +851,87 @@
                                                                     }
                                                   }
                                      },
+                  "/api/v1/orders/{id}/payments":  {
+                                                       "post":  {
+                                                                    "tags":  [
+                                                                                 "order-controller"
+                                                                             ],
+                                                                    "operationId":  "registerPayment",
+                                                                    "parameters":  [
+                                                                                       {
+                                                                                           "name":  "id",
+                                                                                           "in":  "path",
+                                                                                           "required":  true,
+                                                                                           "schema":  {
+                                                                                                          "type":  "string",
+                                                                                                          "format":  "uuid"
+                                                                                                      }
+                                                                                       }
+                                                                                   ],
+                                                                    "requestBody":  {
+                                                                                        "content":  {
+                                                                                                        "application/json":  {
+                                                                                                                                 "schema":  {
+                                                                                                                                                "$ref":  "#/components/schemas/PaymentRequest"
+                                                                                                                                            }
+                                                                                                                             }
+                                                                                                    },
+                                                                                        "required":  true
+                                                                                    },
+                                                                    "responses":  {
+                                                                                      "200":  {
+                                                                                                  "description":  "OK",
+                                                                                                  "content":  {
+                                                                                                                  "*/*":  {
+                                                                                                                              "schema":  {
+                                                                                                                                             "$ref":  "#/components/schemas/OrderDetailResponse"
+                                                                                                                                         }
+                                                                                                                          }
+                                                                                                              }
+                                                                                              }
+                                                                                  }
+                                                                }
+                                                   },
+                  "/api/v1/orders/{id}/payments/{paymentId}/void":  {
+                                                                        "post":  {
+                                                                                     "tags":  [
+                                                                                                  "order-controller"
+                                                                                              ],
+                                                                                     "operationId":  "voidPayment",
+                                                                                     "parameters":  [
+                                                                                                        {
+                                                                                                            "name":  "id",
+                                                                                                            "in":  "path",
+                                                                                                            "required":  true,
+                                                                                                            "schema":  {
+                                                                                                                           "type":  "string",
+                                                                                                                           "format":  "uuid"
+                                                                                                                       }
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "name":  "paymentId",
+                                                                                                            "in":  "path",
+                                                                                                            "required":  true,
+                                                                                                            "schema":  {
+                                                                                                                           "type":  "string",
+                                                                                                                           "format":  "uuid"
+                                                                                                                       }
+                                                                                                        }
+                                                                                                    ],
+                                                                                     "responses":  {
+                                                                                                       "200":  {
+                                                                                                                   "description":  "OK",
+                                                                                                                   "content":  {
+                                                                                                                                   "*/*":  {
+                                                                                                                                               "schema":  {
+                                                                                                                                                              "$ref":  "#/components/schemas/OrderDetailResponse"
+                                                                                                                                                          }
+                                                                                                                                           }
+                                                                                                                               }
+                                                                                                               }
+                                                                                                   }
+                                                                                 }
+                                                                    },
                   "/api/v1/orders/{id}/deliver":  {
                                                       "post":  {
                                                                    "tags":  [
@@ -899,6 +980,15 @@
                                                                                                      }
                                                                                       }
                                                                                   ],
+                                                                   "requestBody":  {
+                                                                                       "content":  {
+                                                                                                       "application/json":  {
+                                                                                                                                "schema":  {
+                                                                                                                                               "$ref":  "#/components/schemas/ConfirmRequest"
+                                                                                                                                           }
+                                                                                                                            }
+                                                                                                   }
+                                                                                   },
                                                                    "responses":  {
                                                                                      "200":  {
                                                                                                  "description":  "OK",
@@ -930,6 +1020,15 @@
                                                                                                     }
                                                                                      }
                                                                                  ],
+                                                                  "requestBody":  {
+                                                                                      "content":  {
+                                                                                                      "application/json":  {
+                                                                                                                               "schema":  {
+                                                                                                                                              "$ref":  "#/components/schemas/CancelRequest"
+                                                                                                                                          }
+                                                                                                                           }
+                                                                                                  }
+                                                                                  },
                                                                   "responses":  {
                                                                                     "200":  {
                                                                                                 "description":  "OK",
@@ -2158,6 +2257,35 @@
                                                                                                                        "null"
                                                                                                                    ]
                                                                                                       },
+                                                                                      "payments":  {
+                                                                                                       "type":  "array",
+                                                                                                       "items":  {
+                                                                                                                     "$ref":  "#/components/schemas/PaymentResponse"
+                                                                                                                 }
+                                                                                                   },
+                                                                                      "paidAmount":  {
+                                                                                                         "type":  [
+                                                                                                                      "number",
+                                                                                                                      "null"
+                                                                                                                  ]
+                                                                                                     },
+                                                                                      "balance":  {
+                                                                                                      "type":  [
+                                                                                                                   "number",
+                                                                                                                   "null"
+                                                                                                               ]
+                                                                                                  },
+                                                                                      "paymentStatus":  {
+                                                                                                            "type":  [
+                                                                                                                         "string",
+                                                                                                                         "null"
+                                                                                                                     ],
+                                                                                                            "enum":  [
+                                                                                                                         "UNPAID",
+                                                                                                                         "PARTIAL",
+                                                                                                                         "PAID"
+                                                                                                                     ]
+                                                                                                        },
                                                                                       "confirmedAt":  {
                                                                                                           "type":  [
                                                                                                                        "string",
@@ -2189,6 +2317,7 @@
                                                                                                     }
                                                                                   },
                                                                    "required":  [
+                                                                                    "balance",
                                                                                     "cancelledAt",
                                                                                     "confirmedAt",
                                                                                     "createdAt",
@@ -2201,12 +2330,68 @@
                                                                                     "items",
                                                                                     "notes",
                                                                                     "orderNumber",
+                                                                                    "paidAmount",
+                                                                                    "paymentStatus",
+                                                                                    "payments",
                                                                                     "priceChannel",
                                                                                     "status",
                                                                                     "totalAmount",
                                                                                     "updatedAt"
                                                                                 ]
                                                                },
+                                       "PaymentResponse":  {
+                                                               "type":  "object",
+                                                               "properties":  {
+                                                                                  "id":  {
+                                                                                             "type":  "string",
+                                                                                             "format":  "uuid"
+                                                                                         },
+                                                                                  "type":  {
+                                                                                               "type":  "string",
+                                                                                               "enum":  [
+                                                                                                            "PAYMENT",
+                                                                                                            "REFUND"
+                                                                                                        ]
+                                                                                           },
+                                                                                  "amount":  {
+                                                                                                 "type":  "number"
+                                                                                             },
+                                                                                  "method":  {
+                                                                                                 "type":  "string",
+                                                                                                 "enum":  [
+                                                                                                              "PIX",
+                                                                                                              "CASH",
+                                                                                                              "CARD"
+                                                                                                          ]
+                                                                                             },
+                                                                                  "paidOn":  {
+                                                                                                 "type":  "string",
+                                                                                                 "format":  "date"
+                                                                                             },
+                                                                                  "voidedAt":  {
+                                                                                                   "type":  [
+                                                                                                                "string",
+                                                                                                                "null"
+                                                                                                            ],
+                                                                                                   "format":  "date-time"
+                                                                                               },
+                                                                                  "notes":  {
+                                                                                                "type":  [
+                                                                                                             "string",
+                                                                                                             "null"
+                                                                                                         ]
+                                                                                            }
+                                                                              },
+                                                               "required":  [
+                                                                                "amount",
+                                                                                "id",
+                                                                                "method",
+                                                                                "notes",
+                                                                                "paidOn",
+                                                                                "type",
+                                                                                "voidedAt"
+                                                                            ]
+                                                           },
                                        "UpdateIngredientRequest":  {
                                                                        "type":  "object",
                                                                        "properties":  {
@@ -2647,6 +2832,57 @@
                                                                                           "wholesale"
                                                                                       ]
                                                                      },
+                                       "PaymentRequest":  {
+                                                              "type":  "object",
+                                                              "properties":  {
+                                                                                 "amount":  {
+                                                                                                "type":  "number",
+                                                                                                "exclusiveMinimum":  0
+                                                                                            },
+                                                                                 "method":  {
+                                                                                                "type":  "string",
+                                                                                                "enum":  [
+                                                                                                             "PIX",
+                                                                                                             "CASH",
+                                                                                                             "CARD"
+                                                                                                         ]
+                                                                                            },
+                                                                                 "paidOn":  {
+                                                                                                "type":  "string",
+                                                                                                "format":  "date"
+                                                                                            },
+                                                                                 "notes":  {
+                                                                                               "type":  "string",
+                                                                                               "maxLength":  1000,
+                                                                                               "minLength":  0
+                                                                                           }
+                                                                             },
+                                                              "required":  [
+                                                                               "amount",
+                                                                               "method"
+                                                                           ]
+                                                          },
+                                       "ConfirmRequest":  {
+                                                              "type":  "object",
+                                                              "properties":  {
+                                                                                 "initialPayment":  {
+                                                                                                        "$ref":  "#/components/schemas/PaymentRequest"
+                                                                                                    }
+                                                                             }
+                                                          },
+                                       "CancelRequest":  {
+                                                             "type":  "object",
+                                                             "properties":  {
+                                                                                "refundMethod":  {
+                                                                                                     "type":  "string",
+                                                                                                     "enum":  [
+                                                                                                                  "PIX",
+                                                                                                                  "CASH",
+                                                                                                                  "CARD"
+                                                                                                              ]
+                                                                                                 }
+                                                                            }
+                                                         },
                                        "OrderSimulationResquest":  {
                                                                        "type":  "object",
                                                                        "properties":  {
