@@ -5,6 +5,7 @@ import dev.peluci.doceenccoreapi.auth.UserRepository;
 import dev.peluci.doceenccoreapi.category.Category;
 import dev.peluci.doceenccoreapi.category.CategoryRepository;
 import dev.peluci.doceenccoreapi.category.CategoryType;
+import dev.peluci.doceenccoreapi.shared.config.ClockConfig;
 import dev.peluci.doceenccoreapi.support.DatabaseCleaner;
 import dev.peluci.doceenccoreapi.support.IntegrationTest;
 import dev.peluci.doceenccoreapi.support.TestAuthenticator;
@@ -97,8 +98,7 @@ public class IngredientIntegrationTest {
                 .andReturn().getResponse().getContentAsString();
 
         LocalDate date = LocalDate.parse(JsonPath.read(body, "$.lastPurchasedOn"));
-        LocalDate utcToday = LocalDate.now(ZoneOffset.UTC);
-        assertThat(date).isBetween(utcToday.minusDays(1), utcToday.plusDays(1));
+        assertThat(date).isEqualTo(LocalDate.now(ClockConfig.BUSINESS_ZONE));
     }
 
     @Test
