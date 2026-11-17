@@ -1,6 +1,5 @@
 package dev.peluci.doceenccoreapi.payment;
 
-import dev.peluci.doceenccoreapi.order.Order;
 import dev.peluci.doceenccoreapi.payment.PaymentSummaryCalculator.Entry;
 import dev.peluci.doceenccoreapi.shared.error.ApiException;
 import dev.peluci.doceenccoreapi.shared.error.ErrorCode;
