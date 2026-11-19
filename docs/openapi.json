@@ -1521,6 +1521,27 @@
                                                                        ]
                                                       }
                                          },
+                  "/api/v1/dashboard":  {
+                                            "get":  {
+                                                        "tags":  [
+                                                                     "Dashboard"
+                                                                 ],
+                                                        "summary":  "Deliveries, sales, cash received and receivables for the home screen",
+                                                        "operationId":  "get_5",
+                                                        "responses":  {
+                                                                          "200":  {
+                                                                                      "description":  "OK",
+                                                                                      "content":  {
+                                                                                                      "*/*":  {
+                                                                                                                  "schema":  {
+                                                                                                                                 "$ref":  "#/components/schemas/DashboardResponse"
+                                                                                                                             }
+                                                                                                              }
+                                                                                                  }
+                                                                                  }
+                                                                      }
+                                                    }
+                                        },
                   "/api/v1/auth/me":  {
                                           "get":  {
                                                       "tags":  [
@@ -3325,6 +3346,173 @@
                                                                                      "unitPrice"
                                                                                  ]
                                                                 },
+                                       "Bucket":  {
+                                                      "type":  "object",
+                                                      "properties":  {
+                                                                         "amount":  {
+                                                                                        "type":  "number"
+                                                                                    },
+                                                                         "ordersCount":  {
+                                                                                             "type":  "integer",
+                                                                                             "format":  "int64"
+                                                                                         }
+                                                                     },
+                                                      "required":  [
+                                                                       "amount",
+                                                                       "ordersCount"
+                                                                   ]
+                                                  },
+                                       "DashboardResponse":  {
+                                                                 "type":  "object",
+                                                                 "properties":  {
+                                                                                    "today":  {
+                                                                                                  "$ref":  "#/components/schemas/Today"
+                                                                                              },
+                                                                                    "thisWeek":  {
+                                                                                                     "$ref":  "#/components/schemas/Week"
+                                                                                                 },
+                                                                                    "overdueCount":  {
+                                                                                                         "type":  "integer",
+                                                                                                         "format":  "int64"
+                                                                                                     },
+                                                                                    "month":  {
+                                                                                                  "$ref":  "#/components/schemas/Month"
+                                                                                              },
+                                                                                    "receivable":  {
+                                                                                                       "$ref":  "#/components/schemas/Receivable"
+                                                                                                   }
+                                                                                },
+                                                                 "required":  [
+                                                                                  "month",
+                                                                                  "overdueCount",
+                                                                                  "receivable",
+                                                                                  "thisWeek",
+                                                                                  "today"
+                                                                              ]
+                                                             },
+                                       "Month":  {
+                                                     "type":  "object",
+                                                     "properties":  {
+                                                                        "from":  {
+                                                                                     "type":  "string",
+                                                                                     "format":  "date"
+                                                                                 },
+                                                                        "to":  {
+                                                                                   "type":  "string",
+                                                                                   "format":  "date"
+                                                                               },
+                                                                        "soldAmount":  {
+                                                                                           "type":  "number"
+                                                                                       },
+                                                                        "receivedAmount":  {
+                                                                                               "type":  "number"
+                                                                                           }
+                                                                    },
+                                                     "required":  [
+                                                                      "from",
+                                                                      "receivedAmount",
+                                                                      "soldAmount",
+                                                                      "to"
+                                                                  ]
+                                                 },
+                                       "Receivable":  {
+                                                          "type":  "object",
+                                                          "properties":  {
+                                                                             "amount":  {
+                                                                                            "type":  "number"
+                                                                                        },
+                                                                             "ordersCount":  {
+                                                                                                 "type":  "integer",
+                                                                                                 "format":  "int64"
+                                                                                             },
+                                                                             "dueOnDelivery":  {
+                                                                                                   "$ref":  "#/components/schemas/Bucket"
+                                                                                               },
+                                                                             "unpaidDelivered":  {
+                                                                                                     "$ref":  "#/components/schemas/Bucket"
+                                                                                                 }
+                                                                         },
+                                                          "required":  [
+                                                                           "amount",
+                                                                           "dueOnDelivery",
+                                                                           "ordersCount",
+                                                                           "unpaidDelivered"
+                                                                       ]
+                                                      },
+                                       "Today":  {
+                                                     "type":  "object",
+                                                     "properties":  {
+                                                                        "date":  {
+                                                                                     "type":  "string",
+                                                                                     "format":  "date"
+                                                                                 },
+                                                                        "orders":  {
+                                                                                       "type":  "array",
+                                                                                       "items":  {
+                                                                                                     "$ref":  "#/components/schemas/TodayOrder"
+                                                                                                 }
+                                                                                   }
+                                                                    },
+                                                     "required":  [
+                                                                      "date",
+                                                                      "orders"
+                                                                  ]
+                                                 },
+                                       "TodayOrder":  {
+                                                          "type":  "object",
+                                                          "properties":  {
+                                                                             "id":  {
+                                                                                        "type":  "string",
+                                                                                        "format":  "uuid"
+                                                                                    },
+                                                                             "orderNumber":  {
+                                                                                                 "type":  "integer",
+                                                                                                 "format":  "int64"
+                                                                                             },
+                                                                             "customerName":  {
+                                                                                                  "type":  "string"
+                                                                                              },
+                                                                             "fulfillmentType":  {
+                                                                                                     "type":  "string"
+                                                                                                 },
+                                                                             "totalAmount":  {
+                                                                                                 "type":  "number"
+                                                                                             },
+                                                                             "balance":  {
+                                                                                             "type":  "number"
+                                                                                         }
+                                                                         },
+                                                          "required":  [
+                                                                           "balance",
+                                                                           "customerName",
+                                                                           "fulfillmentType",
+                                                                           "id",
+                                                                           "orderNumber",
+                                                                           "totalAmount"
+                                                                       ]
+                                                      },
+                                       "Week":  {
+                                                    "type":  "object",
+                                                    "properties":  {
+                                                                       "from":  {
+                                                                                    "type":  "string",
+                                                                                    "format":  "date"
+                                                                                },
+                                                                       "to":  {
+                                                                                  "type":  "string",
+                                                                                  "format":  "date"
+                                                                              },
+                                                                       "ordersCount":  {
+                                                                                           "type":  "integer",
+                                                                                           "format":  "int64"
+                                                                                       }
+                                                                   },
+                                                    "required":  [
+                                                                     "from",
+                                                                     "ordersCount",
+                                                                     "to"
+                                                                 ]
+                                                },
                                        "MeResponse":  {
                                                           "type":  "object",
                                                           "properties":  {
