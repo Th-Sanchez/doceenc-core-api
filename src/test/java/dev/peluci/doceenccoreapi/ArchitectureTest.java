@@ -8,9 +8,11 @@ import jakarta.persistence.Entity;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.Repository;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noFields;
 import static com.tngtech.archunit.library.GeneralCodingRules.NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS;
@@ -48,7 +50,7 @@ public class ArchitectureTest {
                 .should().dependOnClassesThat().resideInAnyPackage(
                         pkg("auth"), pkg("category"), pkg("ingredient"),
                         pkg("recipe"), pkg("product"), pkg("settings"),
-                        pkg("customer"), pkg("order"));
+                        pkg("customer"), pkg("order"), pkg("payment"), pkg("dashboard"));
         rule.allowEmptyShould(true).check(mainClasses);
     }
 
@@ -118,8 +120,50 @@ public class ArchitectureTest {
     void theCatalogAndCustomersDoNotDependOnOrder() {
         ArchRule rule = noClasses().that().resideInAnyPackage(
                         pkg("auth"), pkg("category"), pkg("ingredient"), pkg("recipe"),
-                        pkg("product"), pkg("settings"), pkg("customer"), pkg("shared"))
+                        pkg("product"), pkg("settings"), pkg("customer"), pkg("shared"),
+                        pkg("payment"))
                 .should().dependOnClassesThat().resideInAPackage(pkg("order"));
+        rule.allowEmptyShould(true).check(mainClasses);
+    }
+
+    @Test
+    void paymentIsALeafFeature() {
+        ArchRule rule = noClasses().that().resideInAPackage(pkg("payment"))
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        pkg("auth"), pkg("category"), pkg("ingredient"), pkg("recipe"), pkg("product"),
+                        pkg("settings"), pkg("customer"), pkg("order"), pkg("dashboard"));
+        rule.allowEmptyShould(true).check(mainClasses);
+    }
+
+    @Test
+    void dashboardOnlyDependsOnOrderAndPayment() {
+        ArchRule rule = noClasses().that().resideInAPackage(pkg("dashboard"))
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        pkg("auth"), pkg("category"), pkg("ingredient"), pkg("recipe"),
+                        pkg("product"), pkg("settings"), pkg("customer"));
+        rule.allowEmptyShould(true).check(mainClasses);
+    }
+
+    @Test
+    void noFeatureDependsOnDashboard() {
+        ArchRule rule = noClasses().that().resideOutsideOfPackage(pkg("dashboard"))
+                .should().dependOnClassesThat().resideInAPackage(pkg("dashboard"));
+        rule.allowEmptyShould(true).check(mainClasses);
+    }
+
+    @Test
+    void dashboardIsReadOnlyAndEntityFree() {
+        ArchRule rule = noClasses().that().resideInAPackage(pkg("dashboard"))
+                .should().beAnnotatedWith(Entity.class)
+                .orShould().beAssignableTo(JpaRepository.class)
+                .because("the dashboard only reads: no entities and no repository that exposes save/delete");
+        rule.allowEmptyShould(true).check(mainClasses);
+    }
+
+    @Test
+    void dashboardOnlySubpackageIsDto() {
+        ArchRule rule = classes().that().resideInAPackage(pkg("dashboard"))
+                .should().resideInAnyPackage(ROOT + ".dashboard", ROOT + ".dashboard.dto");
         rule.allowEmptyShould(true).check(mainClasses);
     }
 

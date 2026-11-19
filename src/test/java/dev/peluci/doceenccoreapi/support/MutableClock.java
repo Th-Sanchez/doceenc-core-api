@@ -33,4 +33,8 @@ public class MutableClock extends Clock {
     public Instant instant() {
         return Instant.now().plus(offset);
     }
+
+    public void setInstant(Instant target) {
+        offset = Duration.between(Instant.now(), target);
+    }
 }

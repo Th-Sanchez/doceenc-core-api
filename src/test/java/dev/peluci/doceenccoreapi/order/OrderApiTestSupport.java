@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-abstract class OrderApiTestSupport {
+public abstract class OrderApiTestSupport {
 
     protected static final String BASE = "/api/v1/orders";
     protected static final String HEADER = TestAuthenticator.REQUIRED_HEADER;
