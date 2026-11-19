@@ -76,7 +76,8 @@ class DashboardIntegrationTest extends OrderApiTestSupport {
                 .andExpect(jsonPath("$.thisWeek.from").value("2026-12-02"))
                 .andExpect(jsonPath("$.thisWeek.to").value("2026-12-06"))
                 .andExpect(jsonPath("$.thisWeek.ordersCount").value(3))
-                .andExpect(jsonPath("$.overdueCount").value(1));
+                .andExpect(jsonPath("$.overdue.ordersCount").value(1))
+                .andExpect(jsonPath("$.overdue.to").value("2026-12-01"));
     }
 
     @Test
@@ -88,7 +89,7 @@ class DashboardIntegrationTest extends OrderApiTestSupport {
         doGet(URL).andExpect(status().isOk())
                 .andExpect(jsonPath("$.today.orders", empty()))
                 .andExpect(jsonPath("$.thisWeek.ordersCount").value(0))
-                .andExpect(jsonPath("$.overdueCount").value(0));
+                .andExpect(jsonPath("$.overdue.ordersCount").value(0));
     }
 
     @Test
@@ -173,7 +174,7 @@ class DashboardIntegrationTest extends OrderApiTestSupport {
         doGet(URL).andExpect(status().isOk())
                 .andExpect(jsonPath("$.today.orders", empty()))
                 .andExpect(jsonPath("$.thisWeek.ordersCount").value(0))
-                .andExpect(jsonPath("$.overdueCount").value(0))
+                .andExpect(jsonPath("$.overdue.ordersCount").value(0))
                 .andExpect(jsonPath("$.month.soldAmount").value(0.0))
                 .andExpect(jsonPath("$.month.receivedAmount").value(0.0))
                 .andExpect(jsonPath("$.receivable.amount").value(0.0))

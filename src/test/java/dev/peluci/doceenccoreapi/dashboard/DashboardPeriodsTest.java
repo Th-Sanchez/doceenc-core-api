@@ -22,6 +22,7 @@ class DashboardPeriodsTest {
 
         assertThat(periods.today()).isEqualTo(LocalDate.of(2026, 12, 2));
         assertThat(periods.weekEnd()).isEqualTo(LocalDate.of(2026, 12, 6));
+        assertThat(periods.yesterday()).isEqualTo(LocalDate.of(2026, 12, 1));
     }
 
     @Test
@@ -55,6 +56,14 @@ class DashboardPeriodsTest {
         assertThat(periods.monthTo()).isEqualTo(LocalDate.of(2026, 12, 31));
         assertThat(periods.monthStart()).isEqualTo(Instant.parse("2026-12-01T03:00:00Z"));
         assertThat(periods.nextMonthStart()).isEqualTo(Instant.parse("2027-01-01T03:00:00Z"));
+    }
+
+    @Test
+    void yesterday_onTheFirstOfTheMonth_isTheLastDayOfThePreviousMonth() {
+        var periods = DashboardPeriods.at(clockAt("2026-12-01T15:00:00Z"));
+
+        assertThat(periods.today()).isEqualTo(LocalDate.of(2026, 12, 1));
+        assertThat(periods.yesterday()).isEqualTo(LocalDate.of(2026, 11, 30));
     }
 
     @Test
