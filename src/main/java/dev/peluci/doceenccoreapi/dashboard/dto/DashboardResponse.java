@@ -1,5 +1,6 @@
 package dev.peluci.doceenccoreapi.dashboard.dto;
 
+import dev.peluci.doceenccoreapi.order.FulfillmentType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
@@ -12,7 +13,7 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 public record DashboardResponse(
         @Schema(requiredMode = REQUIRED) Today today,
         @Schema(requiredMode = REQUIRED) Week thisWeek,
-        @Schema(requiredMode = REQUIRED) long overdueCount,
+        @Schema(requiredMode = REQUIRED) Overdue overdue,
         @Schema(requiredMode = REQUIRED) Month month,
         @Schema(requiredMode = REQUIRED) Receivable receivable) {
 
@@ -25,13 +26,18 @@ public record DashboardResponse(
             @Schema(requiredMode = REQUIRED) UUID id,
             @Schema(requiredMode = REQUIRED) long orderNumber,
             @Schema(requiredMode = REQUIRED) String customerName,
-            @Schema(requiredMode = REQUIRED) String fulfillmentType,
+            @Schema(requiredMode = REQUIRED) FulfillmentType fulfillmentType,
             @Schema(requiredMode = REQUIRED) BigDecimal totalAmount,
             @Schema(requiredMode = REQUIRED) BigDecimal balance) {
     }
 
     public record Week(
             @Schema(requiredMode = REQUIRED) LocalDate from,
+            @Schema(requiredMode = REQUIRED) LocalDate to,
+            @Schema(requiredMode = REQUIRED) long ordersCount) {
+    }
+
+    public record Overdue(
             @Schema(requiredMode = REQUIRED) LocalDate to,
             @Schema(requiredMode = REQUIRED) long ordersCount) {
     }

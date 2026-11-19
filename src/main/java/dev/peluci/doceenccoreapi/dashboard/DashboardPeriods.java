@@ -13,7 +13,8 @@ public record DashboardPeriods(
         LocalDate monthFrom,
         LocalDate monthTo,
         Instant monthStart,
-        Instant nextMonthStart) {
+        Instant nextMonthStart,
+        LocalDate yesterday) {
 
     static DashboardPeriods at(Clock clock) {
         ZoneId zone = clock.getZone();
@@ -26,7 +27,8 @@ public record DashboardPeriods(
                 monthFrom,
                 monthTo,
                 monthFrom.atStartOfDay(zone).toInstant(),
-                monthTo.plusDays(1).atStartOfDay(zone).toInstant());
+                monthTo.plusDays(1).atStartOfDay(zone).toInstant(),
+                today.minusDays(1));
     }
 
 }

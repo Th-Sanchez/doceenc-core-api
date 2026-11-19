@@ -6,6 +6,7 @@ import dev.peluci.doceenccoreapi.dashboard.DashboardRepository.TodayRow;
 import dev.peluci.doceenccoreapi.dashboard.dto.DashboardResponse;
 import dev.peluci.doceenccoreapi.dashboard.dto.DashboardResponse.Bucket;
 import dev.peluci.doceenccoreapi.dashboard.dto.DashboardResponse.Month;
+import dev.peluci.doceenccoreapi.dashboard.dto.DashboardResponse.Overdue;
 import dev.peluci.doceenccoreapi.dashboard.dto.DashboardResponse.Receivable;
 import dev.peluci.doceenccoreapi.dashboard.dto.DashboardResponse.Today;
 import dev.peluci.doceenccoreapi.dashboard.dto.DashboardResponse.TodayOrder;
@@ -51,7 +52,7 @@ public class DashboardService {
                         row.getId(),
                         row.getOrderNumber(),
                         row.getCustomerName(),
-                        row.getFulfillmentType().name(),
+                        row.getFulfillmentType(),
                         row.getTotalAmount(),
                         row.getTotalAmount().subtract(nets.get(row.getId()))))
                 .toList();
@@ -68,7 +69,7 @@ public class DashboardService {
         return new DashboardResponse(
                 new Today(periods.today(), todayOrders),
                 new Week(periods.today(), periods.weekEnd(), counts.getWeekCount()),
-                counts.getOverdueCount(),
+                new Overdue(periods.yesterday(), counts.getOverdueCount()),
                 new Month(periods.monthFrom(), periods.monthTo(), sold, received),
                 receivable());
     }

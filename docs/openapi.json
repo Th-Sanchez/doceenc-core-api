@@ -3371,10 +3371,9 @@
                                                                                     "thisWeek":  {
                                                                                                      "$ref":  "#/components/schemas/Week"
                                                                                                  },
-                                                                                    "overdueCount":  {
-                                                                                                         "type":  "integer",
-                                                                                                         "format":  "int64"
-                                                                                                     },
+                                                                                    "overdue":  {
+                                                                                                    "$ref":  "#/components/schemas/Overdue"
+                                                                                                },
                                                                                     "month":  {
                                                                                                   "$ref":  "#/components/schemas/Month"
                                                                                               },
@@ -3384,7 +3383,7 @@
                                                                                 },
                                                                  "required":  [
                                                                                   "month",
-                                                                                  "overdueCount",
+                                                                                  "overdue",
                                                                                   "receivable",
                                                                                   "thisWeek",
                                                                                   "today"
@@ -3415,6 +3414,23 @@
                                                                       "to"
                                                                   ]
                                                  },
+                                       "Overdue":  {
+                                                       "type":  "object",
+                                                       "properties":  {
+                                                                          "to":  {
+                                                                                     "type":  "string",
+                                                                                     "format":  "date"
+                                                                                 },
+                                                                          "ordersCount":  {
+                                                                                              "type":  "integer",
+                                                                                              "format":  "int64"
+                                                                                          }
+                                                                      },
+                                                       "required":  [
+                                                                        "ordersCount",
+                                                                        "to"
+                                                                    ]
+                                                   },
                                        "Receivable":  {
                                                           "type":  "object",
                                                           "properties":  {
@@ -3473,7 +3489,11 @@
                                                                                                   "type":  "string"
                                                                                               },
                                                                              "fulfillmentType":  {
-                                                                                                     "type":  "string"
+                                                                                                     "type":  "string",
+                                                                                                     "enum":  [
+                                                                                                                  "PICKUP",
+                                                                                                                  "DELIVERY"
+                                                                                                              ]
                                                                                                  },
                                                                              "totalAmount":  {
                                                                                                  "type":  "number"
